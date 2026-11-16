@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+*.patch
+build/
+dist/
+wheels/
+*.egg-info
+active/
+
+# Virtual environments
+.venv
+
+# Datasets
+data/raw/defectors/*
+data/processed/*
+
+# Artifacts
+artifacts/models/*
