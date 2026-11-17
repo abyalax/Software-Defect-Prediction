@@ -1,9 +1,9 @@
 """Checkpoint 8: Split strategy evaluation and recommendations."""
 
-import json
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import load_domain_sets
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -23,15 +23,10 @@ class SplitStrategyEvaluation:
         jit_train = self._loader.load_jit_train()
         jit_test = self._loader.load_jit_test()
 
-        # Define ML/DL repositories
-        ml_dl_repos = {
-            "lightning",
-            "jax",
-            "transformers",
-            "ray",
-            "scikit-learn",
-            "yolov5",
-        }
+        # Domains come from the shared YAML; ambiguous repos are excluded
+        domain_sets = load_domain_sets(self._loader.config.project_root)
+        ml_dl_repos = domain_sets["ml_dl"]
+        non_ml_repos = domain_sets["non_ml"]
 
         # Calculate labels
         def calculate_label(df: pd.DataFrame) -> pd.DataFrame:
@@ -53,9 +48,9 @@ class SplitStrategyEvaluation:
         test_repos = set(test_no_freq["repo"].unique())
 
         train_ml_dl = train_repos.intersection(ml_dl_repos)
-        train_non_ml = train_repos - ml_dl_repos
+        train_non_ml = train_repos.intersection(non_ml_repos)
         test_ml_dl = test_repos.intersection(ml_dl_repos)
-        test_non_ml = test_repos - ml_dl_repos
+        test_non_ml = test_repos.intersection(non_ml_repos)
 
         self._reporter.display_text("Current Split Analysis:")
         self._reporter.display_text(
@@ -69,15 +64,14 @@ class SplitStrategyEvaluation:
 
         # Evaluation
         if len(train_repos.intersection(test_repos)) == len(train_repos):
-            self._reporter.display_warning("  WARNING: All repositories overlap between train and test!")
-            self._reporter.display_warning("  This is a random record-level split, not repository-level split.")
-            self._reporter.display_warning("  This causes potential data leakage.")
+            self._reporter.display_text("  INFO: Current split is random record-level (not repository-level)")
+            self._reporter.display_text("  INFO: Repository-level split will be used in pipeline to avoid data leakage")
         self._reporter.display_text()
 
         # Improved split suggestions
         all_repos = sorted(train_repos.union(test_repos))
         all_ml_dl = [r for r in all_repos if r in ml_dl_repos]
-        all_non_ml = [r for r in all_repos if r not in ml_dl_repos]
+        all_non_ml = [r for r in all_repos if r in non_ml_repos]
 
         self._reporter.display_text("Recommended Split Strategy: Balanced Repository-Level Split")
 
@@ -139,7 +133,7 @@ class SplitStrategyEvaluation:
             "issues_identified": [
                 "Current split is random record-level, not repository-level",
                 "All repositories overlap between train and test",
-                "Potential data leakage from repository-specific patterns",
+                "Pipeline will use repository-level split to avoid data leakage",
             ],
         }
 

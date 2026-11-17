@@ -22,6 +22,11 @@ class DefectorsDatasetLoader:
         """
         self._config = config
 
+    @property
+    def config(self) -> DatasetConfig:
+        """Dataset configuration used by this loader."""
+        return self._config
+
     def load_jit_train(self) -> pd.DataFrame:
         """Load JIT bug prediction training data.
 

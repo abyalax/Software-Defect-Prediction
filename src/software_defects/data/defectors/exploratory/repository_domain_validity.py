@@ -87,15 +87,26 @@ class RepositoryDomainValidity:
         if "datetime" in all_jit.columns:
             self._reporter.display_text("Datetime Range per Repository:")
 
-            # Convert datetime if needed
+            # Convert datetime with multiple format attempts
             try:
-                all_jit["datetime"] = pd.to_datetime(all_jit["datetime"])
+                # First try automatic parsing
+                all_jit["datetime"] = pd.to_datetime(all_jit["datetime"], errors="coerce")
+                # Count unparseable values
+                unparseable_count = all_jit["datetime"].isna().sum()
+                if unparseable_count > 0:
+                    self._reporter.display_text(
+                        f"  INFO: {unparseable_count:,} datetime values could not be parsed and set to NaT"
+                    )
+                # Drop NaT for range calculation
+                all_jit_dt = all_jit[all_jit["datetime"].notna()].copy()
             except Exception:
                 self._reporter.display_warning("  Could not convert datetime column")
-            else:
+                all_jit_dt = None
+
+            if all_jit_dt is not None and len(all_jit_dt) > 0:
                 datetime_ranges = []
-                for repo in sorted(all_jit["repo"].unique()):
-                    repo_df = all_jit[all_jit["repo"] == repo]
+                for repo in sorted(all_jit_dt["repo"].unique()):
+                    repo_df = all_jit_dt[all_jit_dt["repo"] == repo]
                     min_dt = repo_df["datetime"].min()
                     max_dt = repo_df["datetime"].max()
                     datetime_ranges.append({"repo": repo, "min": str(min_dt), "max": str(max_dt)})
@@ -107,8 +118,8 @@ class RepositoryDomainValidity:
                 self._reporter.display_text()
 
                 # Show summary
-                overall_min = all_jit["datetime"].min()
-                overall_max = all_jit["datetime"].max()
+                overall_min = all_jit_dt["datetime"].min()
+                overall_max = all_jit_dt["datetime"].max()
                 self._reporter.display_text(f"  Overall datetime range: {overall_min} to {overall_max}")
                 self._reporter.display_text()
 
@@ -120,10 +131,14 @@ class RepositoryDomainValidity:
                 if len(df) > 0:
                     try:
                         df_copy = df.copy()
-                        df_copy["datetime"] = pd.to_datetime(df_copy["datetime"])
-                        min_dt = df_copy["datetime"].min()
-                        max_dt = df_copy["datetime"].max()
-                        self._reporter.display_text(f"  {split_name}: {min_dt} to {max_dt}")
+                        df_copy["datetime"] = pd.to_datetime(df_copy["datetime"], errors="coerce")
+                        df_copy = df_copy[df_copy["datetime"].notna()]
+                        if len(df_copy) > 0:
+                            min_dt = df_copy["datetime"].min()
+                            max_dt = df_copy["datetime"].max()
+                            self._reporter.display_text(f"  {split_name}: {min_dt} to {max_dt}")
+                        else:
+                            self._reporter.display_text(f"  {split_name}: No valid datetime values")
                     except Exception:
                         self._reporter.display_text(f"  {split_name}: Could not parse datetime")
             self._reporter.display_text()

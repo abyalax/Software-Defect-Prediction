@@ -1,5 +1,7 @@
 """Checkpoint 2: Label validity verification ."""
 
+import re
+
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
@@ -76,7 +78,7 @@ class LabelValidity:
                 ]
 
                 if len(defective_df) > 0:
-                    line_counts = defective_df["lines"].apply(lambda x: len(x) if isinstance(x, list) else 0)
+                    line_counts = defective_df["lines"].apply(len)
                     self._reporter.display_text(f"  {split_name} (n={len(defective_df):,}):")
                     self._reporter.display_text(f"    Number of lines per defective row:")
                     self._reporter.display_text(f"      Mean: {line_counts.mean():.2f}")
@@ -89,48 +91,56 @@ class LabelValidity:
                     self._reporter.display_text(f"  {split_name}: No defective rows")
                 self._reporter.display_text()
 
-        # Check consistency of lines against hunk header (simplified check)
+        # Check consistency of defective lines against diff hunk ranges (old and new side)
         if "content" in jit_train.columns and "lines" in jit_train.columns:
             self._reporter.display_text("Hunk Consistency Check:")
-            self._reporter.display_text("  Checking if lines fall within diff hunk ranges...")
+            self._reporter.display_text("  Checking if defective lines fall within diff hunk ranges...")
 
-            # Sample 100 rows for manual inspection
-            sample_df = jit_train.head(100)
-            out_of_range_count = 0
+            # Hunk header format: @@ -old_start[,old_len] +new_start[,new_len] @@
+            hunk_pattern = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@", re.MULTILINE)
 
-            for idx, row in sample_df.iterrows():
-                content = str(row["content"]) if row["content"] is not None else ""
-                lines = row["lines"] if isinstance(row["lines"], list) else []
+            def hunk_ranges(content: str) -> tuple[list[tuple[int, int]], list[tuple[int, int]]]:
+                old_ranges: list[tuple[int, int]] = []
+                new_ranges: list[tuple[int, int]] = []
+                for old_start, old_len, new_start, new_len in hunk_pattern.findall(content):
+                    old_n = max(int(old_len) if old_len else 1, 1)
+                    new_n = max(int(new_len) if new_len else 1, 1)
+                    old_ranges.append((int(old_start), int(old_start) + old_n - 1))
+                    new_ranges.append((int(new_start), int(new_start) + new_n - 1))
+                return old_ranges, new_ranges
 
-                if len(lines) > 0:
-                    # Parse hunk headers (e.g., @@ -10,5 +10,7 @@)
-                    import re
+            def all_in_ranges(line_numbers: list[int], ranges: list[tuple[int, int]]) -> bool:
+                return all(any(lo <= n <= hi for lo, hi in ranges) for n in line_numbers)
 
-                    hunk_pattern = r"@@ -(\d+),?\d* \+(\d+),?\d* @@"
-                    hunks = re.findall(hunk_pattern, content)
+            defective_mask = jit_train["lines"].apply(len) > 0
+            n_defective = int(defective_mask.sum())
+            sample_df = jit_train[defective_mask].sample(n=min(2000, n_defective), random_state=42)
 
-                    if hunks:
-                        # Get the first hunk's new file line range
-                        try:
-                            new_start = int(hunks[0][1])
-                            # Count added lines to estimate range
-                            added_lines = content.count("\n+") - content.count("\n-")
-                            new_end = new_start + added_lines
+            in_old = in_new = in_either = no_hunk = 0
+            for content, lines in zip(sample_df["content"], sample_df["lines"], strict=True):
+                old_ranges, new_ranges = hunk_ranges(str(content) if content is not None else "")
+                if not new_ranges:
+                    no_hunk += 1
+                    continue
+                line_numbers = [int(n) for n in lines]
+                is_old = all_in_ranges(line_numbers, old_ranges)
+                is_new = all_in_ranges(line_numbers, new_ranges)
+                in_old += is_old
+                in_new += is_new
+                in_either += is_old or is_new
 
-                            # Check if any line is outside range
-                            for line_num in lines:
-                                if line_num < new_start or line_num > new_end:
-                                    out_of_range_count += 1
-                                    break
-                        except (ValueError, IndexError):
-                            pass
-
-            if out_of_range_count > 0:
-                self._reporter.display_warning(
-                    f"  {out_of_range_count} samples have lines outside hunk range (in first 100)"
-                )
+            n_checked = len(sample_df) - no_hunk
+            if n_checked > 0:
+                self._reporter.display_text(f"  Defective rows checked: {n_checked:,} (no hunk header: {no_hunk:,})")
+                self._reporter.display_text(f"  All lines inside NEW-side hunks: {in_new / n_checked * 100:.2f}%")
+                self._reporter.display_text(f"  All lines inside OLD-side hunks: {in_old / n_checked * 100:.2f}%")
+                self._reporter.display_text(f"  All lines inside either side: {in_either / n_checked * 100:.2f}%")
+                if in_either / n_checked < 0.9:
+                    self._reporter.display_warning(
+                        "  Many defective lines fall outside the diff hunks; verify what `lines` refers to"
+                    )
             else:
-                self._reporter.display_text("  All sampled lines appear within hunk ranges")
+                self._reporter.display_warning("  No defective rows with parsable hunk headers in sample")
             self._reporter.display_text()
 
         # Cross-tabulation: empty content vs label

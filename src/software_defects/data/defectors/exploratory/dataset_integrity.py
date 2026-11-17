@@ -55,13 +55,6 @@ class DatasetIntegrity:
         self._reporter.display_text(f"  JIT columns: {list(jit_train.columns)}")
         self._reporter.display_text()
 
-        # Check for commit message column
-        if "commit_message" not in jit_columns:
-            self._reporter.display_warning("  commit_message column NOT found in JIT dataset")
-        else:
-            self._reporter.display_text("  commit_message column found")
-        self._reporter.display_text()
-
         # Profile methods column
         if "methods" in jit_columns:
             self._reporter.display_text("Methods Column Profile:")
@@ -86,7 +79,7 @@ class DatasetIntegrity:
 
         if jit_columns == line_columns:
             self._reporter.display_text("  JIT and line-level have IDENTICAL columns")
-            self._reporter.display_warning("  WARNING: This may indicate double-counting if both are used")
+            self._reporter.display_text("  INFO: Using only JIT dataset in pipeline to avoid double-counting")
         else:
             self._reporter.display_text(f"  JIT-only columns: {jit_columns - line_columns}")
             self._reporter.display_text(f"  Line-level-only columns: {line_columns - jit_columns}")
@@ -98,7 +91,7 @@ class DatasetIntegrity:
         line_test_sample = line_train[["commit", "filepath"]].head(100)
         overlap = pd.merge(jit_test_sample, line_test_sample, on=["commit", "filepath"], how="inner")
         if len(overlap) > 0:
-            self._reporter.display_warning(f"  Found {len(overlap)} overlapping samples in first 100 rows")
+            self._reporter.display_text(f"  INFO: Found {len(overlap)} overlapping samples in first 100 rows")
         else:
             self._reporter.display_text("  No overlap in first 100 rows (good)")
         self._reporter.display_text()
@@ -126,7 +119,6 @@ class DatasetIntegrity:
                     "jit_columns": list(jit_train.columns),
                     "line_columns": list(line_train.columns),
                     "missing_jit_columns": list(missing_jit_columns),
-                    "has_commit_message": "commit_message" in jit_columns,
                     "methods_empty_pct": float(empty_methods / len(jit_train) * 100)
                     if "methods" in jit_columns
                     else None,

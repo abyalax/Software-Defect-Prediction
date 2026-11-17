@@ -3,6 +3,7 @@
 import re
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import load_domain_sets
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -66,7 +67,7 @@ class JitInputValidity:
         def count_lines(content: str, line_type: str) -> int:
             if not content:
                 return 0
-            pattern = f"\\n{line_type}"
+            pattern = f"\n{line_type}"
             return content.count(pattern)
 
         jit_train["added_lines"] = jit_train["content"].apply(
@@ -76,13 +77,13 @@ class JitInputValidity:
             lambda x: count_lines(str(x), "-") if x is not None else 0
         )
 
-        self._reporter.display_text(f"  Added lines per diff:")
+        self._reporter.display_text("  Added lines per diff:")
         self._reporter.display_text(f"    Mean: {jit_train['added_lines'].mean():.2f}")
         self._reporter.display_text(f"    Median: {jit_train['added_lines'].median():.2f}")
         self._reporter.display_text(f"    Max: {jit_train['added_lines'].max()}")
         self._reporter.display_text()
 
-        self._reporter.display_text(f"  Removed lines per diff:")
+        self._reporter.display_text("  Removed lines per diff:")
         self._reporter.display_text(f"    Mean: {jit_train['removed_lines'].mean():.2f}")
         self._reporter.display_text(f"    Median: {jit_train['removed_lines'].median():.2f}")
         self._reporter.display_text(f"    Max: {jit_train['removed_lines'].max()}")
@@ -134,14 +135,10 @@ class JitInputValidity:
         if "repo" in jit_train.columns:
             self._reporter.display_text("Content Length Statistics by Domain:")
 
-            # Define ML/DL repositories
-            ml_dl_repos = {"lightning", "jax", "transformers", "ray", "scikit-learn", "yolov5"}
-
-            # Exclude freqtrade
-            jit_train_filtered = jit_train[jit_train["repo"] != "freqtrade"]
-
-            ml_dl_df = jit_train_filtered[jit_train_filtered["repo"].isin(ml_dl_repos)]
-            non_ml_df = jit_train_filtered[~jit_train_filtered["repo"].isin(ml_dl_repos)]
+            # Domains come from the shared YAML; ambiguous/unmapped repos are excluded
+            domain_sets = load_domain_sets(self._loader.config.project_root)
+            ml_dl_df = jit_train[jit_train["repo"].isin(domain_sets["ml_dl"])]
+            non_ml_df = jit_train[jit_train["repo"].isin(domain_sets["non_ml"])]
 
             for domain_name, domain_df in [("ML/DL", ml_dl_df), ("Non-ML", non_ml_df)]:
                 if len(domain_df) > 0:

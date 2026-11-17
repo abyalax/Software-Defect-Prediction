@@ -3,6 +3,7 @@
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import load_domain_sets
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -27,15 +28,10 @@ class RepositorySplit:
         # Exclude freqtrade (only 1 record)
         all_jit = all_jit[all_jit["repo"] != "freqtrade"]
 
-        # Define ML/DL repositories
-        ml_dl_repos = {
-            "lightning",
-            "jax",
-            "transformers",
-            "ray",
-            "scikit-learn",
-            "yolov5",
-        }
+        # Domains come from the shared YAML; ambiguous repos are excluded
+        domain_sets = load_domain_sets(self._loader.config.project_root)
+        ml_dl_repos = domain_sets["ml_dl"]
+        non_ml_repos = domain_sets["non_ml"]
 
         # Calculate binary labels
         all_jit["label"] = all_jit["lines"].apply(
@@ -44,7 +40,7 @@ class RepositorySplit:
 
         # Scenario 1: Train on ML/DL, Test on Non-ML
         ml_dl_df = all_jit[all_jit["repo"].isin(ml_dl_repos)]
-        non_ml_df = all_jit[~all_jit["repo"].isin(ml_dl_repos)]
+        non_ml_df = all_jit[all_jit["repo"].isin(non_ml_repos)]
 
         scenario_1 = {
             "scenario": "ML_to_NonML",
@@ -74,7 +70,7 @@ class RepositorySplit:
         # Scenario 3: Repository-level split (holdout some repos from each domain)
         all_repos = sorted(all_jit["repo"].unique())
         ml_dl_repo_list = [r for r in all_repos if r in ml_dl_repos]
-        non_ml_repo_list = [r for r in all_repos if r not in ml_dl_repos]
+        non_ml_repo_list = [r for r in all_repos if r in non_ml_repos]
 
         # Holdout 1 ML/DL repo and 3 Non-ML repos for test
         if len(ml_dl_repo_list) > 1:

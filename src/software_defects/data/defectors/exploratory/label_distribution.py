@@ -3,6 +3,7 @@
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import load_domain_sets
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -27,15 +28,10 @@ class LabelDistribution:
         # Exclude freqtrade (only 1 record)
         all_jit = all_jit[all_jit["repo"] != "freqtrade"]
 
-        # Define ML/DL repositories
-        ml_dl_repos = {
-            "lightning",
-            "jax",
-            "transformers",
-            "ray",
-            "scikit-learn",
-            "yolov5",
-        }
+        # Domains come from the shared YAML; ambiguous repos are reported separately
+        domain_sets = load_domain_sets(self._loader.config.project_root)
+        ml_dl_repos = domain_sets["ml_dl"]
+        non_ml_repos = domain_sets["non_ml"]
 
         # Calculate binary labels
         all_jit["label"] = all_jit["lines"].apply(
@@ -48,7 +44,7 @@ class LabelDistribution:
 
         # Per-domain distribution
         ml_dl_df = all_jit[all_jit["repo"].isin(ml_dl_repos)]
-        non_ml_df = all_jit[~all_jit["repo"].isin(ml_dl_repos)]
+        non_ml_df = all_jit[all_jit["repo"].isin(non_ml_repos)]
 
         domain_stats = {
             "ml_dl": ml_dl_df["label"].value_counts(normalize=True).to_dict() if len(ml_dl_df) > 0 else {},
@@ -69,7 +65,7 @@ class LabelDistribution:
         # Create CSV
         label_dist_data = []
         for repo, stats in repo_stats.items():
-            domain = "ml_dl" if repo in ml_dl_repos else "non_ml"
+            domain = "ml_dl" if repo in ml_dl_repos else "non_ml" if repo in non_ml_repos else "ambiguous"
             label_dist_data.append(
                 {
                     "repository": repo,

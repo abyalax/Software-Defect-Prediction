@@ -15,7 +15,7 @@ class DatasetConfig:
     row_limit: int | None = None
     dtype: dict[str, str] | None = None
     tokenizer_model: str = "microsoft/codebert-base"
-    tokenizer_max_length: int = 1024
+    tokenizer_max_length: int = 512
 
     @property
     def raw_dir(self) -> Path:

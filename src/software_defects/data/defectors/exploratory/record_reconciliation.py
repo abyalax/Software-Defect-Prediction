@@ -1,10 +1,9 @@
 """Checkpoint 7: Record reconciliation and repository distribution ."""
 
 import pandas as pd
-import yaml
-from pathlib import Path
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import load_repository_mapping
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -26,13 +25,8 @@ class RecordReconciliation:
         jit_val = self._loader.load_jit_val()
         all_jit = pd.concat([jit_train, jit_test, jit_val], ignore_index=True)
 
-        # Load repository mapping
-        config_path = Path(".devin/config/repository_mapping.yaml")
-        if config_path.exists():
-            with open(config_path) as f:
-                repo_mapping = yaml.safe_load(f)
-        else:
-            repo_mapping = {"ml_dl_repositories": {}, "non_ml_repositories": {}, "unmapped_repositories": {}}
+        # Load repository mapping from the shared YAML (single source of truth)
+        repo_mapping = load_repository_mapping(self._loader.config.project_root)
 
         ml_dl_repos = set(repo_mapping.get("ml_dl_repositories", {}).keys())
         non_ml_repos = set(repo_mapping.get("non_ml_repositories", {}).keys())
@@ -95,7 +89,7 @@ class RecordReconciliation:
 
         # Exclude unmapped repos for domain totals
         included_repos = ml_dl_repos.union(non_ml_repos)
-        included_df = all_jit[all_jit["repo"].isin(included_repos)]
+        all_jit[all_jit["repo"].isin(included_repos)]
 
         repo_totals = {}
         for repo in sorted(included_repos):
@@ -105,8 +99,15 @@ class RecordReconciliation:
         total_included = sum(repo_totals.values())
         self._reporter.display_text(f"  Total rows (included repos): {total_included:,}")
 
-        if total_included != expected_total:
-            self._reporter.display_warning(f"  MISMATCH: {total_included:,} != {expected_total:,}")
+        # Every row must be accounted for as included, ambiguous or excluded
+        status_totals = repo_status_df.groupby("status")["record_count"].sum().to_dict()
+        for status_name, status_total in sorted(status_totals.items()):
+            self._reporter.display_text(f"  Status '{status_name}': {int(status_total):,}")
+        reconciled_total = int(repo_status_df["record_count"].sum())
+        if reconciled_total != actual_total:
+            self._reporter.display_warning(f"  MISMATCH: {reconciled_total:,} != {actual_total:,}")
+        else:
+            self._reporter.display_text("  MATCH: all rows are accounted for by repository status")
         self._reporter.display_text()
 
         # Update summary

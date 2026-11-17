@@ -72,9 +72,10 @@ class LeakageUnitAnalysis:
             self._reporter.display_text(f"  Test-Val commit overlap: {test_val_commit_overlap:,}")
 
             if train_test_commit_overlap > 0:
-                self._reporter.display_warning(
-                    "  WARNING: Commits overlap between train and test (files from same commit in different splits)!"
+                self._reporter.display_text(
+                    "  INFO: Commits overlap between train and test (files from same commit in different splits)"
                 )
+                self._reporter.display_text("  INFO: Repository-level split will be used in pipeline to avoid this")
             self._reporter.display_text()
 
         # Content hash overlap (exact duplicate diffs)
@@ -117,9 +118,9 @@ class LeakageUnitAnalysis:
 
                 # Check for overlap
                 if train_max >= test_min and test_max >= train_min:
-                    self._reporter.display_warning("  WARNING: Datetime ranges overlap between train and test!")
+                    self._reporter.display_text("  INFO: Datetime ranges overlap between train and test")
                     self._reporter.display_text(
-                        "  NOTE: This is problematic for time-based splits but acceptable for cross-domain"
+                        "  INFO: This is acceptable for cross-domain evaluation with repository-level split"
                     )
                 else:
                     self._reporter.display_text("  No datetime overlap (good for time-based split)")

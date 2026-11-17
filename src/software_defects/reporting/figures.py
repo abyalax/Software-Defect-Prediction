@@ -1,4 +1,3 @@
-
 """Reusable utilities for creating and exporting matplotlib figures."""
 
 from __future__ import annotations
@@ -32,9 +31,7 @@ def _pyplot() -> ModuleType:
         import matplotlib.pyplot as plt
 
     except ImportError as error:
-        raise ImportError(
-            "Matplotlib is required. Install it using `uv add matplotlib`."
-        ) from error
+        raise ImportError("Matplotlib is required. Install it using `uv add matplotlib`.") from error
 
     return plt
 
@@ -94,9 +91,7 @@ class FigureBuilder:
 
         invalid_formats = set(formats) - supported_formats
         if invalid_formats:
-            raise ValueError(
-                f"Unsupported formats: {sorted(invalid_formats)}"
-            )
+            raise ValueError(f"Unsupported formats: {sorted(invalid_formats)}")
 
         self.output_dir.mkdir(parents=True, exist_ok=True)
 

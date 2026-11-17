@@ -3,6 +3,7 @@
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import SECTION_TO_DOMAIN, load_repository_mapping
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -24,44 +25,12 @@ class RepositoryMapping:
         jit_val = self._loader.load_jit_val()
         all_jit = pd.concat([jit_train, jit_test, jit_val], ignore_index=True)
 
-        # Define ML/DL repositories with justifications
+        # Classifications come from the shared YAML (single source of truth)
+        raw_mapping = load_repository_mapping(self._loader.config.project_root)
         repository_classifications = {
-            "lightning": {
-                "domain": "ml_dl",
-                "justification": "PyTorch Lightning - Deep learning framework for PyTorch",
-            },
-            "jax": {
-                "domain": "ml_dl",
-                "justification": "JAX - Autograd and XLA for ML research",
-            },
-            "transformers": {
-                "domain": "ml_dl",
-                "justification": "Hugging Face Transformers - State-of-the-art NLP models",
-            },
-            "ray": {
-                "domain": "ml_dl",
-                "justification": "Ray - Distributed ML and RL framework",
-            },
-            "scikit-learn": {
-                "domain": "ml_dl",
-                "justification": "scikit-learn - Classical machine learning library",
-            },
-            "yolov5": {
-                "domain": "ml_dl",
-                "justification": "YOLOv5 - Object detection deep learning model",
-            },
-            "ansible": {
-                "domain": "non_ml",
-                "justification": "Ansible - IT automation and configuration management",
-            },
-            "sentry": {
-                "domain": "non_ml",
-                "justification": "Sentry - Error tracking and monitoring platform",
-            },
-            "core": {
-                "domain": "non_ml",
-                "justification": "Core - Likely infrastructure/core utilities",
-            },
+            repo: {"domain": domain, "justification": meta.get("criteria", "")}
+            for section, domain in SECTION_TO_DOMAIN.items()
+            for repo, meta in (raw_mapping.get(section) or {}).items()
         }
 
         # Get all unique repositories, excluding freqtrade (only 1 record)
@@ -74,8 +43,8 @@ class RepositoryMapping:
             classification = repository_classifications.get(
                 repo,
                 {
-                    "domain": "non_ml",
-                    "justification": "General purpose software repository",
+                    "domain": "unmapped",
+                    "justification": "Not listed in repository_mapping.yaml",
                 },
             )
 

@@ -57,23 +57,12 @@ Install required dependencies:
 uv sync
 ```
 
-### 4. Create Domain Mapping
+### 4. Domain Mapping
 
-Create a `domain_mapping.yaml` file in `data/raw/defectors/` to classify repositories:
-
-```yaml
-ml_dl:
-  - name: jax
-    full_name: google/jax
-    justification: JAX - Autograd and XLA for ML research
-  # ... add other ML/DL repos
-
-non_ml:
-  - name: ansible
-    full_name: ansible/ansible
-    justification: Ansible - IT automation and configuration management
-  # ... add other Non-ML repos
-```
+Repository domains are defined in a single file: `artifacts/mapping/repository_mapping.yaml`.
+Keys must match the `repo` column exactly (case-sensitive, e.g. `spaCy`, `core`).
+Repositories under `ambiguous_repositories` and `unmapped_repositories` are excluded from all
+ML vs non-ML experiments.
 
 ---
 
@@ -243,7 +232,7 @@ The data pipeline performs the following steps:
 1. **Load Data**: Combine train, test, and val splits from the original dataset
 2. **Generate Split**: Apply the specified split scenario with repository-level holdout
 3. **Aggregate** (optional): Aggregate file-level data to commit-level using max() rule for labels
-4. **Tokenize** (optional): Apply HuggingFace tokenizer (default: CodeBERT with max_length=1024)
+4. **Tokenize** (optional): Apply HuggingFace tokenizer (default: CodeBERT with max_length=512)
 5. **Save** (optional): Save processed data to Parquet files
 
 ### Usage Examples
@@ -326,7 +315,7 @@ The pipeline saves the following artifacts under `artifacts/report/defectors/dat
 ### Tokenization Notes
 
 - **Default model**: microsoft/codebert-base
-- **Default max_length**: 1024
+- **Default max_length**: 512 (CodeBERT/RoBERTa supports at most 512 tokens)
 - **Truncation**: Enabled by default for sequences exceeding max_length
 - **First run**: Requires internet access to download tokenizer (cached afterwards)
 - **Token statistics**: Mean, median, percentiles, and overflow percentage reported in output

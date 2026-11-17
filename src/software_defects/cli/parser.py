@@ -42,7 +42,7 @@ class ParserArgs:
         parser.add_argument(
             "--scenario",
             type=str,
-            required=True,
+            default="Repository_Level_Split",
             choices=[
                 "ML_to_NonML",
                 "NonML_to_ML",
@@ -50,7 +50,7 @@ class ParserArgs:
                 "Within_Domain_ML_DL",
                 "Within_Domain_Non_ML",
             ],
-            help="Split scenario to use.",
+            help="Split scenario to use (default: Repository_Level_Split).",
         )
         parser.add_argument(
             "--output-dir",

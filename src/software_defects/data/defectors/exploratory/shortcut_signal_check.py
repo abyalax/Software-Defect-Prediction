@@ -1,11 +1,10 @@
 """Checkpoint 13: Shortcut signal check ."""
 
 import pandas as pd
-import yaml
-from pathlib import Path
 from sklearn.metrics import roc_auc_score
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import load_domain_sets
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -67,16 +66,10 @@ class ShortcutSignalCheck:
         if "repo" in jit_train.columns:
             self._reporter.display_text("AUC per Domain (Train):")
 
-            # Load domain mapping
-            config_path = Path(".devin/config/repository_mapping.yaml")
-            if config_path.exists():
-                with open(config_path) as f:
-                    repo_mapping = yaml.safe_load(f)
-                ml_dl_repos = set(repo_mapping.get("ml_dl_repositories", {}).keys())
-                non_ml_repos = set(repo_mapping.get("non_ml_repositories", {}).keys())
-            else:
-                ml_dl_repos = set()
-                non_ml_repos = set()
+            # Load domain mapping from the shared YAML (single source of truth)
+            domain_sets = load_domain_sets(self._loader.config.project_root)
+            ml_dl_repos = domain_sets["ml_dl"]
+            non_ml_repos = domain_sets["non_ml"]
 
             ml_dl_df = jit_train[jit_train["repo"].isin(ml_dl_repos)]
             non_ml_df = jit_train[jit_train["repo"].isin(non_ml_repos)]

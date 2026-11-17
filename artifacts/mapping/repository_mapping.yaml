@@ -1,5 +1,8 @@
-# Repository domain mapping configuration for Defectors dataset
-# This file allows alternative mappings without modifying code
+# Repository domain mapping for the Defectors dataset (single source of truth).
+# Keys MUST match the `repo` column in the parquet files exactly (case-sensitive).
+# Repositories under ambiguous_repositories / unmapped_repositories are excluded from all
+# ML vs non-ML experiments. openpilot is "borderline": keep it in non_ml, and rerun the
+# experiments without it as a sensitivity analysis.
 
 ml_dl_repositories:
   lightning:
@@ -27,6 +30,11 @@ ml_dl_repositories:
     criteria: "Object detection deep learning model"
     confidence: clear
 
+  spaCy:
+    domain: ml_dl
+    criteria: "NLP library with neural network models (topics: deep-learning, machine-learning, text-classification)"
+    confidence: clear
+
 non_ml_repositories:
   ansible:
     domain: non_ml
@@ -48,28 +56,57 @@ non_ml_repositories:
     domain: non_ml
     criteria: "Distributed task queue"
     confidence: clear
-  homeassistant:
+  core:
     domain: non_ml
-    criteria: "Home automation platform"
+    criteria: "Home Assistant core - home automation / IoT platform"
+    confidence: clear
+  black:
+    domain: non_ml
+    criteria: "Python code formatter"
+    confidence: clear
+  cpython:
+    domain: non_ml
+    criteria: "Python language interpreter and standard library"
+    confidence: clear
+  django-rest-framework:
+    domain: non_ml
+    criteria: "REST API toolkit for Django"
+    confidence: clear
+  localstack:
+    domain: non_ml
+    criteria: "Local cloud service emulator"
+    confidence: clear
+  pipenv:
+    domain: non_ml
+    criteria: "Python dependency and virtualenv manager"
+    confidence: clear
+  poetry:
+    domain: non_ml
+    criteria: "Python packaging and dependency manager"
+    confidence: clear
+  redash:
+    domain: non_ml
+    criteria: "Data visualization and dashboard tool"
+    confidence: clear
+  scrapy:
+    domain: non_ml
+    criteria: "Web scraping framework"
     confidence: clear
 
-ambiguous_repositories:
-  spacy:
-    domain: ambiguous
-    criteria: "NLP library - could be ML/DL or general NLP"
-    confidence: ambiguous
   pandas:
-    domain: ambiguous
-    criteria: "Data manipulation library - data science but not ML"
-    confidence: ambiguous
+    domain: non_ml
+    criteria: "Data analysis/manipulation library (topics: data-analysis, data-science); no ML functionality"
+    confidence: clear
   numpy:
-    domain: ambiguous
-    criteria: "Numerical computing library - foundational for ML but not ML"
-    confidence: ambiguous
+    domain: non_ml
+    criteria: "N-dimensional array and scientific computing library; no ML functionality"
+    confidence: clear
   openpilot:
-    domain: ambiguous
-    criteria: "Self-driving car software - uses ML but is systems engineering"
-    confidence: ambiguous
+    domain: non_ml
+    criteria: "Driver assistance / robotics software (topics: robotics, ADAS); ML models are a component, not the main function"
+    confidence: borderline
+
+ambiguous_repositories: {}
 
 unmapped_repositories:
   freqtrade:

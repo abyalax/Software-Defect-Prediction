@@ -109,12 +109,14 @@ class DefectorsDataPipeline:
         )
 
         train_df = split_result.train_df
+        val_df = split_result.val_df
         test_df = split_result.test_df
 
         # Step 3: Aggregate to commit-level if requested
         if commit_level:
             self._reporter.display_text("Step 3: Aggregating to commit-level...")
             train_df = self._split_generator.aggregate_to_commit_level(train_df)
+            val_df = self._split_generator.aggregate_to_commit_level(val_df)
             test_df = self._split_generator.aggregate_to_commit_level(test_df)
             self._reporter.display_text(f"  Train commits: {len(train_df):,}")
             self._reporter.display_text(f"  Test commits: {len(test_df):,}")
@@ -132,6 +134,7 @@ class DefectorsDataPipeline:
         if tokenize:
             self._reporter.display_text(f"Step 4: Tokenizing (max_length={self._config.tokenizer_max_length})...")
             train_df = self._tokenizer.tokenize_dataframe(train_df, truncation=True)
+            val_df = self._tokenizer.tokenize_dataframe(val_df, truncation=True)
             test_df = self._tokenizer.tokenize_dataframe(test_df, truncation=True)
 
             train_stats = self._tokenizer.get_statistics(train_df)
@@ -166,12 +169,15 @@ class DefectorsDataPipeline:
             output_dir.mkdir(parents=True, exist_ok=True)
 
             train_path = output_dir / f"train_{scenario.value}.parquet"
+            val_path = output_dir / f"val_{scenario.value}.parquet"
             test_path = output_dir / f"test_{scenario.value}.parquet"
 
             train_df.to_parquet(train_path, index=False)
+            val_df.to_parquet(val_path, index=False)
             test_df.to_parquet(test_path, index=False)
 
             self._reporter.display_text(f"  Saved train to: {train_path}")
+            self._reporter.display_text(f"  Saved val to: {val_path}")
             self._reporter.display_text(f"  Saved test to: {test_path}")
             self._reporter.display_text()
 
@@ -180,6 +186,7 @@ class DefectorsDataPipeline:
                 {
                     "output_dir": str(output_dir),
                     "train_path": str(train_path),
+                    "val_path": str(val_path),
                     "test_path": str(test_path),
                 }
             )

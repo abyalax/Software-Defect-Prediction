@@ -1,10 +1,9 @@
 """Checkpoint 6: Cross-domain feasibility verification ."""
 
 import pandas as pd
-import yaml
-from pathlib import Path
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
+from software_defects.data.defectors.domain_mapping import load_repository_mapping
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -25,18 +24,8 @@ class CrossDomainFeasibility:
         jit_val = self._loader.load_jit_val()
         all_jit = pd.concat([jit_train, jit_test, jit_val], ignore_index=True)
 
-        # Load repository mapping from config
-        config_path = Path(".devin/config/repository_mapping.yaml")
-        if config_path.exists():
-            with open(config_path) as f:
-                repo_mapping = yaml.safe_load(f)
-        else:
-            repo_mapping = {
-                "ml_dl_repositories": {},
-                "non_ml_repositories": {},
-                "ambiguous_repositories": {},
-                "unmapped_repositories": {},
-            }
+        # Load repository mapping from the shared YAML (single source of truth)
+        repo_mapping = load_repository_mapping(self._loader.config.project_root)
 
         # Extract domain mappings
         ml_dl_repos = set(repo_mapping.get("ml_dl_repositories", {}).keys())
@@ -56,10 +45,9 @@ class CrossDomainFeasibility:
 
         # Label distribution per domain for all splits
         if "lines" in all_jit.columns:
-            sample_lines = all_jit["lines"].iloc[0]
-            all_jit["label"] = all_jit["lines"].apply(
-                lambda x: 1 if len(x) > 0 else 0 if isinstance(x, (list, type(sample_lines))) else 0
-            )
+            # The label must exist on every frame used below, not only on the pooled one
+            for frame in (jit_train, jit_test, jit_val, all_jit):
+                frame["label"] = frame["lines"].apply(lambda x: int(len(x) > 0))
 
             for split_name, df in [("Train", jit_train), ("Test", jit_test), ("Val", jit_val)]:
                 self._reporter.display_text(f"{split_name} Domain Summary:")

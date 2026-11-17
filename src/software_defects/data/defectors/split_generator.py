@@ -7,7 +7,8 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 import pandas as pd
-import yaml
+
+from software_defects.data.defectors.domain_mapping import load_domain_sets
 
 if TYPE_CHECKING:
     from software_defects.config import DatasetConfig
@@ -58,31 +59,11 @@ class DefectorsSplitGenerator:
             config: Dataset configuration.
         """
         self._config = config
-        self._domain_mapping = self._load_domain_mapping()
 
-        # Define ML/DL repositories
-        self._ml_dl_repos = set(self._domain_mapping.get("ml_dl", []))
-        self._non_ml_repos = set(self._domain_mapping.get("non_ml", []))
-
-    def _load_domain_mapping(self) -> dict:
-        """Load domain mapping from YAML file.
-
-        Returns:
-            Dictionary with domain mappings.
-        """
-        mapping_path = self._config.raw_dir / "domain_mapping.yaml"
-
-        if not mapping_path.exists():
-            raise FileNotFoundError(f"Domain mapping file not found: {mapping_path}")
-
-        with open(mapping_path) as f:
-            mapping = yaml.safe_load(f)
-
-        # Extract repo names
-        ml_dl_repos = [item["name"] for item in mapping.get("ml_dl", [])]
-        non_ml_repos = [item["name"] for item in mapping.get("non_ml", [])]
-
-        return {"ml_dl": ml_dl_repos, "non_ml": non_ml_repos}
+        # Domains come from the shared YAML; ambiguous/unmapped repos are never used in a split
+        domain_sets = load_domain_sets(config.project_root)
+        self._ml_dl_repos = domain_sets["ml_dl"]
+        self._non_ml_repos = domain_sets["non_ml"]
 
     def _filter_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Filter data to exclude freqtrade and apply basic cleaning.
@@ -157,7 +138,7 @@ class DefectorsSplitGenerator:
     ) -> SplitResult:
         """Split: Train on ML/DL, Test on Non-ML."""
         ml_dl_df = df[df["repo"].isin(self._ml_dl_repos)].copy()
-        non_ml_df = df[~df["repo"].isin(self._ml_dl_repos)].copy()
+        non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
 
         # Split train into train/val
         train_df, val_df = self._split_train_val_by_commit(ml_dl_df, val_ratio, seed)
@@ -191,7 +172,7 @@ class DefectorsSplitGenerator:
         seed: int,
     ) -> SplitResult:
         """Split: Train on Non-ML, Test on ML/DL."""
-        non_ml_df = df[~df["repo"].isin(self._ml_dl_repos)].copy()
+        non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
         ml_dl_df = df[df["repo"].isin(self._ml_dl_repos)].copy()
 
         # Split train into train/val
@@ -228,7 +209,7 @@ class DefectorsSplitGenerator:
         """Split: Repository-level holdout (mixed domains)."""
         all_repos = sorted(df["repo"].unique().tolist())
         ml_dl_repo_list = [r for r in all_repos if r in self._ml_dl_repos]
-        non_ml_repo_list = [r for r in all_repos if r not in self._ml_dl_repos]
+        non_ml_repo_list = [r for r in all_repos if r in self._non_ml_repos]
 
         # Holdout 1 ML/DL repo and 3 Non-ML repos for test
         if len(ml_dl_repo_list) > 1:
@@ -328,7 +309,7 @@ class DefectorsSplitGenerator:
         seed: int,
     ) -> SplitResult:
         """Split: Within-domain Non-ML holdout."""
-        non_ml_df = df[~df["repo"].isin(self._ml_dl_repos)].copy()
+        non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
         non_ml_repos = sorted(non_ml_df["repo"].unique().tolist())
 
         if len(non_ml_repos) > 3:
@@ -418,7 +399,7 @@ class DefectorsSplitGenerator:
         seed: int,
     ) -> SplitResult:
         """Split: Leave-one-repo-out for Non-ML domain."""
-        non_ml_df = df[~df["repo"].isin(self._ml_dl_repos)].copy()
+        non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
         non_ml_repos = sorted(non_ml_df["repo"].unique().tolist())
 
         if len(non_ml_repos) < 2:
@@ -514,7 +495,7 @@ class DefectorsSplitGenerator:
         """Split: Group K-Fold for Non-ML domain (groups by repo)."""
         from sklearn.model_selection import GroupKFold
 
-        non_ml_df = df[~df["repo"].isin(self._ml_dl_repos)].copy()
+        non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
 
         if len(non_ml_df["repo"].unique()) < n_folds:
             raise ValueError(f"Need at least {n_folds} Non-ML repos for {n_folds}-fold split")
@@ -560,7 +541,7 @@ class DefectorsSplitGenerator:
     ) -> SplitResult:
         """Split: Cross-domain using default random split (train/val/test)."""
         ml_dl_df = df[df["repo"].isin(self._ml_dl_repos)].copy()
-        non_ml_df = df[~df["repo"].isin(self._ml_dl_repos)].copy()
+        non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
 
         # Use ML/DL as source, Non-ML as target
         source_df = ml_dl_df

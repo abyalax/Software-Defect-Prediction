@@ -1,0 +1,25 @@
+repository,domain,justification,total_samples,unique_commits
+airflow,non_ml,Workflow orchestration platform,9954,3279
+ansible,non_ml,IT automation and configuration management,43565,22906
+black,non_ml,Python code formatter,556,379
+celery,non_ml,Distributed task queue,3479,1713
+core,non_ml,Home Assistant core - home automation / IoT platform,35948,12014
+cpython,non_ml,Python language interpreter and standard library,7276,4062
+django,non_ml,Python web framework,11243,5019
+django-rest-framework,non_ml,REST API toolkit for Django,403,222
+jax,ml_dl,Autograd and XLA for ML research,726,310
+lightning,ml_dl,Deep learning framework for PyTorch,11162,4324
+localstack,non_ml,Local cloud service emulator,1804,715
+numpy,non_ml,N-dimensional array and scientific computing library; no ML functionality,993,482
+openpilot,non_ml,"Driver assistance / robotics software (topics: robotics, ADAS); ML models are a component, not the main function",1580,759
+pandas,non_ml,"Data analysis/manipulation library (topics: data-analysis, data-science); no ML functionality",15582,6250
+pipenv,non_ml,Python dependency and virtualenv manager,121,44
+poetry,non_ml,Python packaging and dependency manager,2232,700
+ray,ml_dl,Distributed ML and RL framework,17741,4857
+redash,non_ml,Data visualization and dashboard tool,720,337
+scikit-learn,ml_dl,Classical machine learning library,4999,2101
+scrapy,non_ml,Web scraping framework,425,185
+sentry,non_ml,Error tracking and monitoring platform,37485,15788
+spaCy,ml_dl,"NLP library with neural network models (topics: deep-learning, machine-learning, text-classification)",2455,1183
+transformers,ml_dl,Hugging Face Transformers - State-of-the-art NLP models,1845,421
+yolov5,ml_dl,Object detection deep learning model,1125,586

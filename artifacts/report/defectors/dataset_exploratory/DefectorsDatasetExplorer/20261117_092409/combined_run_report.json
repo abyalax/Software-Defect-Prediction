@@ -1,0 +1,204 @@
+{
+  "metadata": {
+    "timestamp": "2026-11-17T09:26:56.385277",
+    "git_commit": "7062d3c08545bf9d047ee0b1d21a4d4a40f784a3",
+    "library_versions": {
+      "pandas": "3.1.1",
+      "numpy": "unknown"
+    },
+    "total_warnings": 10
+  },
+  "warnings": [
+    {
+      "id": "W001",
+      "severity": "warning",
+      "message": "  commit_message column NOT found in JIT dataset"
+    },
+    {
+      "id": "W002",
+      "severity": "warning",
+      "message": "  WARNING: This may indicate double-counting if both are used"
+    },
+    {
+      "id": "W003",
+      "severity": "warning",
+      "message": "  Found 100 overlapping samples in first 100 rows"
+    },
+    {
+      "id": "W004",
+      "severity": "warning",
+      "message": "  Could not convert datetime column"
+    },
+    {
+      "id": "W005",
+      "severity": "warning",
+      "message": "  WARNING: Commits overlap between train and test (files from same commit in different splits)!"
+    },
+    {
+      "id": "W006",
+      "severity": "warning",
+      "message": "  WARNING: Datetime ranges overlap between train and test!"
+    },
+    {
+      "id": "W007",
+      "severity": "warning",
+      "message": "  WARNING: All repositories overlap between train and test!"
+    },
+    {
+      "id": "W008",
+      "severity": "warning",
+      "message": "  This is a random record-level split, not repository-level split."
+    },
+    {
+      "id": "W009",
+      "severity": "warning",
+      "message": "  This causes potential data leakage."
+    },
+    {
+      "id": "W010",
+      "severity": "warning",
+      "message": "  Could not load tokenizer Salesforce/codet5-small: Input must be a List[Union[str, AddedToken]]"
+    }
+  ],
+  "checkpoint_summary": {
+    "checkpoint_1": {
+      "jit_train_rows": 193420,
+      "jit_test_rows": 10000,
+      "jit_val_rows": 10000,
+      "jit_total_rows": 213420,
+      "line_train_rows": 193420,
+      "line_test_rows": 10000,
+      "line_val_rows": 10000,
+      "line_total_rows": 213420,
+      "jit_columns": [
+        "datetime",
+        "commit",
+        "repo",
+        "filepath",
+        "content",
+        "methods",
+        "lines"
+      ],
+      "line_columns": [
+        "datetime",
+        "commit",
+        "repo",
+        "filepath",
+        "content",
+        "methods",
+        "lines"
+      ],
+      "missing_jit_columns": [],
+      "has_commit_message": false,
+      "methods_empty_pct": 0.0,
+      "jit_line_identical_columns": true
+    },
+    "checkpoint_2": {
+      "label_column": "lines",
+      "label_interpretation": {
+        "empty_array": 0,
+        "non_empty_array": 1
+      },
+      "train_defective_count": 91177,
+      "test_defective_count": 1246,
+      "val_defective_count": 1246
+    },
+    "checkpoint_3": {
+      "train_empty_content_count": 2762,
+      "train_content_length_mean": 1884.9970582152828,
+      "train_content_length_p95": 6329.0,
+      "mean_hunks_per_diff": 2.373187881294592,
+      "mean_added_lines": 20.14459207941268,
+      "mean_removed_lines": 7.356984799917279,
+      "only_additions_pct": 20.375348981491058
+    },
+    "checkpoint_4": {
+      "num_repositories": 24,
+      "top_repositories": {
+        "ansible": 43565,
+        "sentry": 37485,
+        "core": 35948,
+        "ray": 17741,
+        "pandas": 15582,
+        "django": 11243,
+        "lightning": 11162,
+        "airflow": 9954,
+        "cpython": 7276,
+        "scikit-learn": 4999
+      },
+      "files_per_commit_median": 1.0,
+      "files_per_commit_p90": 4.0,
+      "files_per_commit_p99": 20.0
+    },
+    "checkpoint_5": {
+      "train_duplicates": 0,
+      "test_duplicates": 0,
+      "train_test_key_overlap": 0,
+      "train_test_commit_overlap": 4822,
+      "content_hash_overlap": 0
+    },
+    "checkpoint_6": {
+      "ml_dl_repos_count": 7,
+      "non_ml_repos_count": 17,
+      "ambiguous_repos_count": 0,
+      "unmapped_in_data": [],
+      "ml_domain_rows": 40053,
+      "non_ml_domain_rows": 173366,
+      "ml_domain_positives": 18313,
+      "non_ml_domain_positives": 75355
+    },
+    "checkpoint_7": {
+      "expected_total_rows": 213420,
+      "actual_total_rows": 213420,
+      "row_count_match": true,
+      "row_count_difference": 0,
+      "included_repos_count": 24,
+      "excluded_repos_count": 1,
+      "repository_status_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261117_092409\\repository_status.csv"
+    },
+    "checkpoint_8": {
+      "current_is_repo_level": false,
+      "current_repo_overlap": 24,
+      "suggested_test_ml_dl_repos": [
+        "jax",
+        "lightning"
+      ],
+      "suggested_test_non_ml_repos": [
+        "airflow",
+        "ansible",
+        "black",
+        "celery"
+      ],
+      "split_recommendations_json": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261117_092409\\split_recommendations.json"
+    },
+    "checkpoint_9": {
+      "global_defective_pct": 43.88925072275664,
+      "ml_dl_defective_pct": 45.72191845804309,
+      "non_ml_defective_pct": 43.46584682117601,
+      "csv_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261117_092409\\label_distribution.csv"
+    },
+    "checkpoint_10": {
+      "total_repositories": 24,
+      "ml_dl_repositories": 7,
+      "non_ml_repositories": 17,
+      "csv_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261117_092409\\repository_mapping.csv"
+    },
+    "checkpoint_11": {
+      "ml_to_non_ml_train_samples": 40053,
+      "ml_to_non_ml_test_samples": 173366,
+      "non_ml_to_ml_train_samples": 173366,
+      "non_ml_to_ml_test_samples": 40053,
+      "repo_level_split_train_samples": 158618,
+      "repo_level_split_test_samples": 54801,
+      "csv_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261117_092409\\split_report.csv"
+    },
+    "checkpoint_12": {
+      "codebert_overflow_pct": 36.582794489738546,
+      "csv_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261117_092409\\token_analysis.csv"
+    },
+    "checkpoint_13": {
+      "feature_auc_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261117_092409\\shortcut_signal_auc.csv",
+      "max_diff_length_auc": 0.6286070646539569
+    }
+  }
+}
