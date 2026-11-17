@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -14,8 +14,13 @@ class DatasetConfig:
     dataset_name: str
     row_limit: int | None = None
     dtype: dict[str, str] | None = None
-    tokenizer_model: str = "microsoft/codebert-base"
-    tokenizer_max_length: int = 512
+    tokenizer_max_length: int = 1024
+    tokenizer_models: dict[str, str] = field(
+        default_factory=lambda: {
+            "codebert": "microsoft/codebert-base",
+            "codet5": "Salesforce/codet5-small",
+        }
+    )
 
     @property
     def raw_dir(self) -> Path:
@@ -47,3 +52,8 @@ class DatasetConfig:
     def artifacts_dir(self) -> Path:
         """Directory that receives generated reports."""
         return self.project_root / "artifacts"
+
+    @property
+    def processed_dir(self) -> Path:
+        """Directory that receives processed parquet files."""
+        return self.project_root / "data" / "processed" / "defectors"

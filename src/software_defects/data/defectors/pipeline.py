@@ -28,11 +28,14 @@ class DefectorsDataPipeline:
         self._config = config
         self._loader = DefectorsDatasetLoader(config)
         self._split_generator = DefectorsSplitGenerator(config)
-        self._tokenizer = DefectorsTokenizer(
-            config,
-            model_name=config.tokenizer_model,
-            max_length=config.tokenizer_max_length,
-        )
+        self._tokenizers = {
+            model_key: DefectorsTokenizer(
+                config,
+                model_name=model_name,
+                max_length=config.tokenizer_max_length,
+            )
+            for model_key, model_name in config.tokenizer_models.items()
+        }
         self._reporter = ReportWritter(
             config=config,
             domain_data="defectors",
@@ -46,7 +49,7 @@ class DefectorsDataPipeline:
         output_dir: Path | None = None,
         commit_level: bool = False,
         tokenize: bool = True,
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame] | dict[str, dict[str, pd.DataFrame]]:
         """Run the complete data processing pipeline.
 
         Args:
@@ -56,7 +59,8 @@ class DefectorsDataPipeline:
             tokenize: Whether to apply tokenization.
 
         Returns:
-            Tuple of (train_df, test_df).
+            If tokenize=True: Dict mapping model keys to {train, val, test} DataFrames.
+            If tokenize=False: Tuple of (train_df, test_df).
         """
         self._reporter.display_section("Defectors Data Pipeline")
         self._reporter.display_text()
@@ -131,27 +135,33 @@ class DefectorsDataPipeline:
             )
 
         # Step 4: Tokenize if requested
+        tokenized_data = {}
+        tokenizer_stats = {}
         if tokenize:
             self._reporter.display_text(f"Step 4: Tokenizing (max_length={self._config.tokenizer_max_length})...")
-            train_df = self._tokenizer.tokenize_dataframe(train_df, truncation=True)
-            val_df = self._tokenizer.tokenize_dataframe(val_df, truncation=True)
-            test_df = self._tokenizer.tokenize_dataframe(test_df, truncation=True)
+            for model_key, tokenizer in self._tokenizers.items():
+                self._reporter.display_text(f"  Tokenizing with {model_key} ({tokenizer._model_name})...")
+                train_df_tok = tokenizer.tokenize_dataframe(train_df.copy(), truncation=True)
+                val_df_tok = tokenizer.tokenize_dataframe(val_df.copy(), truncation=True)
+                test_df_tok = tokenizer.tokenize_dataframe(test_df.copy(), truncation=True)
 
-            train_stats = self._tokenizer.get_statistics(train_df)
-            test_stats = self._tokenizer.get_statistics(test_df)
+                train_stats = tokenizer.get_statistics(train_df_tok)
+                test_stats = tokenizer.get_statistics(test_df_tok)
 
-            self._reporter.display_text(
-                f"  Train - Mean tokens: {train_stats['mean']:.2f}, Truncated: {train_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
-            )
-            self._reporter.display_text(
-                f"  Test - Mean tokens: {test_stats['mean']:.2f}, Truncated: {test_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
-            )
-            self._reporter.display_text()
+                self._reporter.display_text(
+                    f"    Train - Mean tokens: {train_stats['mean']:.2f}, Truncated: {train_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
+                )
+                self._reporter.display_text(
+                    f"    Test - Mean tokens: {test_stats['mean']:.2f}, Truncated: {test_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
+                )
 
-            # Update summary with tokenization statistics
-            self._reporter.update_summary(
-                {
-                    "tokenizer_model": self._config.tokenizer_model,
+                tokenized_data[model_key] = {
+                    "train": train_df_tok,
+                    "val": val_df_tok,
+                    "test": test_df_tok,
+                }
+                tokenizer_stats[model_key] = {
+                    "tokenizer_model": tokenizer._model_name,
                     "tokenizer_max_length": self._config.tokenizer_max_length,
                     "train_mean_tokens": train_stats["mean"],
                     "train_median_tokens": train_stats["median"],
@@ -160,36 +170,71 @@ class DefectorsDataPipeline:
                     "test_median_tokens": test_stats["median"],
                     "test_truncated_pct": test_stats.get("truncated_percentage", 0),
                 }
-            )
+            self._reporter.display_text()
+
+            # Update summary with tokenization statistics for all models
+            self._reporter.update_summary({"tokenizer_stats": tokenizer_stats})
 
         # Step 5: Save if output directory provided
         if output_dir is not None:
             self._reporter.display_text("Step 5: Saving processed data...")
             output_dir = Path(output_dir)
-            output_dir.mkdir(parents=True, exist_ok=True)
 
-            train_path = output_dir / f"train_{scenario.value}.parquet"
-            val_path = output_dir / f"val_{scenario.value}.parquet"
-            test_path = output_dir / f"test_{scenario.value}.parquet"
+            # Create scenario-specific subfolder
+            scenario_dir = output_dir / scenario.value
+            scenario_dir.mkdir(parents=True, exist_ok=True)
+
+            # Save non-tokenized data (raw split)
+            train_path = scenario_dir / f"{scenario.value}_train.parquet"
+            val_path = scenario_dir / f"{scenario.value}_val.parquet"
+            test_path = scenario_dir / f"{scenario.value}_test.parquet"
 
             train_df.to_parquet(train_path, index=False)
             val_df.to_parquet(val_path, index=False)
             test_df.to_parquet(test_path, index=False)
 
-            self._reporter.display_text(f"  Saved train to: {train_path}")
-            self._reporter.display_text(f"  Saved val to: {val_path}")
-            self._reporter.display_text(f"  Saved test to: {test_path}")
+            self._reporter.display_text(f"  Saved raw train to: {train_path}")
+            self._reporter.display_text(f"  Saved raw val to: {val_path}")
+            self._reporter.display_text(f"  Saved raw test to: {test_path}")
+
+            # Save tokenized data for each model
+            if tokenize and tokenized_data:
+                for model_key, data in tokenized_data.items():
+                    model_dir = scenario_dir / model_key
+                    model_dir.mkdir(parents=True, exist_ok=True)
+
+                    train_tok_path = model_dir / f"{scenario.value}_train.parquet"
+                    val_tok_path = model_dir / f"{scenario.value}_val.parquet"
+                    test_tok_path = model_dir / f"{scenario.value}_test.parquet"
+
+                    data["train"].to_parquet(train_tok_path, index=False)
+                    data["val"].to_parquet(val_tok_path, index=False)
+                    data["test"].to_parquet(test_tok_path, index=False)
+
+                    self._reporter.display_text(f"  Saved {model_key} train to: {train_tok_path}")
+                    self._reporter.display_text(f"  Saved {model_key} val to: {val_tok_path}")
+                    self._reporter.display_text(f"  Saved {model_key} test to: {test_tok_path}")
+
             self._reporter.display_text()
 
             # Update summary with output paths
-            self._reporter.update_summary(
-                {
-                    "output_dir": str(output_dir),
-                    "train_path": str(train_path),
-                    "val_path": str(val_path),
-                    "test_path": str(test_path),
+            output_summary = {
+                "output_dir": str(output_dir),
+                "scenario_dir": str(scenario_dir),
+                "train_path": str(train_path),
+                "val_path": str(val_path),
+                "test_path": str(test_path),
+            }
+            if tokenize and tokenized_data:
+                output_summary["model_paths"] = {
+                    model_key: {
+                        "train": str(scenario_dir / model_key / f"{scenario.value}_train.parquet"),
+                        "val": str(scenario_dir / model_key / f"{scenario.value}_val.parquet"),
+                        "test": str(scenario_dir / model_key / f"{scenario.value}_test.parquet"),
+                    }
+                    for model_key in tokenized_data.keys()
                 }
-            )
+            self._reporter.update_summary(output_summary)
 
         # Save reports
         self._reporter.save_reports(
@@ -197,4 +242,7 @@ class DefectorsDataPipeline:
             json_filename=f"pipeline_{scenario.value}.json",
         )
 
+        # Return tokenized data if available, otherwise return raw data
+        if tokenize and tokenized_data:
+            return tokenized_data
         return train_df, test_df

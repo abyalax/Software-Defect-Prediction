@@ -40,7 +40,7 @@ class DefectorsTokenizer:
             Loaded tokenizer instance.
         """
         if self._tokenizer is None:
-            self._tokenizer = AutoTokenizer.from_pretrained(self._model_name)
+            self._tokenizer = AutoTokenizer.from_pretrained(self._model_name, local_files_only=True)
         return self._tokenizer
 
     def tokenize_batch(

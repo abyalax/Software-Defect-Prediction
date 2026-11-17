@@ -1,0 +1,22 @@
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Defectors Data Pipeline
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Step 1: Loading data...
+  Loaded 213,420 records
+
+Step 2: Generating split (NonML_to_ML)...
+  Train: 156,012 samples (43.29% defective)
+  Test: 40,053 samples (45.72% defective)
+  Train repos: 17
+  Test repos: 7
+
+Step 4: Tokenizing (max_length=1024)...
+  Train - Mean tokens: 463.90, Truncated: 0.00%
+  Test - Mean tokens: 501.07, Truncated: 0.00%
+
+Step 5: Saving processed data...
+  Saved train to: C:\Users\abya\python\software-defect\data\processed\defectors\NonML_to_ML\NonML_to_ML_train.parquet
+  Saved val to: C:\Users\abya\python\software-defect\data\processed\defectors\NonML_to_ML\NonML_to_ML_val.parquet
+  Saved test to: C:\Users\abya\python\software-defect\data\processed\defectors\NonML_to_ML\NonML_to_ML_test.parquet

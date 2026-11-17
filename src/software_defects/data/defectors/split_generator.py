@@ -77,10 +77,11 @@ class DefectorsSplitGenerator:
         # Exclude freqtrade (only 1 record)
         df = df[df["repo"] != "freqtrade"].copy()
 
+        # Drop rows with an empty diff: all of them are defect-free, so they would leak the label
+        df = df[df["content"].fillna("").str.strip() != ""].copy()
+
         # Calculate binary labels
-        df["label"] = df["lines"].apply(
-            lambda x: 1 if len(x) > 0 else 0 if isinstance(x, (list, type(df["lines"].iloc[0]))) else 0
-        )
+        df["label"] = df["lines"].apply(lambda x: int(len(x) > 0))
 
         return df
 
@@ -91,6 +92,7 @@ class DefectorsSplitGenerator:
         val_ratio: float = 0.1,
         equalize_train_size: int | None = None,
         seed: int = 42,
+        fold: int = 0,
     ) -> SplitResult:
         """Generate a dataset split based on the specified scenario.
 
@@ -100,6 +102,7 @@ class DefectorsSplitGenerator:
             val_ratio: Ratio of validation set from train (default 0.1).
             equalize_train_size: If set, limit training samples to this size.
             seed: Random seed for reproducibility.
+            fold: Fold index used by the Group K-Fold scenarios (0 to 4).
 
         Returns:
             SplitResult with train/val/test DataFrames and metadata.
@@ -121,9 +124,9 @@ class DefectorsSplitGenerator:
         elif scenario == SplitScenario.LEAVE_REPO_OUT_NON_ML:
             return self._split_leave_repo_out_non_ml(df, val_ratio, equalize_train_size, seed)
         elif scenario == SplitScenario.GROUP_KFOLD_ML_DL:
-            return self._split_group_kfold_ml_dl(df, val_ratio, equalize_train_size, seed)
+            return self._split_group_kfold_ml_dl(df, val_ratio, equalize_train_size, seed, fold=fold)
         elif scenario == SplitScenario.GROUP_KFOLD_NON_ML:
-            return self._split_group_kfold_non_ml(df, val_ratio, equalize_train_size, seed)
+            return self._split_group_kfold_non_ml(df, val_ratio, equalize_train_size, seed, fold=fold)
         elif scenario == SplitScenario.CROSS_DOMAIN_DEFAULT:
             return self._split_cross_domain_default(df, val_ratio, equalize_train_size, seed)
         else:
@@ -443,6 +446,7 @@ class DefectorsSplitGenerator:
         equalize_train_size: int | None,
         seed: int,
         n_folds: int = 5,
+        fold: int = 0,
     ) -> SplitResult:
         """Split: Group K-Fold for ML/DL domain (groups by repo)."""
         from sklearn.model_selection import GroupKFold
@@ -455,8 +459,10 @@ class DefectorsSplitGenerator:
         gkf = GroupKFold(n_splits=n_folds)
         groups = ml_dl_df["repo"].values
 
-        # Use first fold for train/val, second fold for test
-        train_val_idx, test_idx = next(gkf.split(ml_dl_df, groups=groups))
+        # Select the requested fold as the test fold
+        if not 0 <= fold < n_folds:
+            raise ValueError(f"fold must be in [0, {n_folds - 1}], got {fold}")
+        train_val_idx, test_idx = list(gkf.split(ml_dl_df, groups=groups))[fold]
         train_val_df = ml_dl_df.iloc[train_val_idx].copy()
         test_df = ml_dl_df.iloc[test_idx].copy()
 
@@ -491,6 +497,7 @@ class DefectorsSplitGenerator:
         equalize_train_size: int | None,
         seed: int,
         n_folds: int = 5,
+        fold: int = 0,
     ) -> SplitResult:
         """Split: Group K-Fold for Non-ML domain (groups by repo)."""
         from sklearn.model_selection import GroupKFold
@@ -503,8 +510,10 @@ class DefectorsSplitGenerator:
         gkf = GroupKFold(n_splits=n_folds)
         groups = non_ml_df["repo"].values
 
-        # Use first fold for train/val, second fold for test
-        train_val_idx, test_idx = next(gkf.split(non_ml_df, groups=groups))
+        # Select the requested fold as the test fold
+        if not 0 <= fold < n_folds:
+            raise ValueError(f"fold must be in [0, {n_folds - 1}], got {fold}")
+        train_val_idx, test_idx = list(gkf.split(non_ml_df, groups=groups))[fold]
         train_val_df = non_ml_df.iloc[train_val_idx].copy()
         test_df = non_ml_df.iloc[test_idx].copy()
 

@@ -1,0 +1,29 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-baseline --dataset defectors --scenario Within_Domain_ML_DL --seeds 42,43,44",
+  "scenario": "Within_Domain_ML_DL",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "equalize_train_size": null,
+  "n_runs": 3,
+  "mean": {
+    "pr_auc": 0.6845,
+    "f1": 0.7362,
+    "mcc": 0.0691,
+    "roc_auc": 0.5949,
+    "train_seconds": 18.1947,
+    "inference_seconds": 0.2036
+  },
+  "std": {
+    "pr_auc": 0.0,
+    "f1": 0.0,
+    "mcc": 0.0,
+    "roc_auc": 0.0,
+    "train_seconds": 2.8636,
+    "inference_seconds": 0.0498
+  },
+  "results_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\TfidfLogRegBaseline\\20261117_183730\\baseline_results.csv",
+  "per_repo_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\TfidfLogRegBaseline\\20261117_183730\\baseline_per_repo.csv"
+}

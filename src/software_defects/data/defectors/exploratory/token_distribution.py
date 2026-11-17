@@ -17,9 +17,9 @@ TOKENIZER_MODELS = {
 
 def _download_tokenizers() -> None:
     """Pre-download tokenizers to avoid download errors during analysis."""
-    for model_label, hf_name in TOKENIZER_MODELS.items():
+    for _, hf_name in TOKENIZER_MODELS.items():
         try:
-            AutoTokenizer.from_pretrained(hf_name)
+            AutoTokenizer.from_pretrained(hf_name, local_files_only=True)
         except Exception:
             pass  # Will be handled during actual analysis
 
@@ -60,7 +60,7 @@ class TokenDistribution:
         summary: dict = {}
         for model_label, hf_name in TOKENIZER_MODELS.items():
             try:
-                tokenizer = AutoTokenizer.from_pretrained(hf_name)
+                tokenizer = AutoTokenizer.from_pretrained(hf_name, local_files_only=True)
             except Exception as exc:  # noqa: BLE001 - offline or missing model must not stop the run
                 self._reporter.display_warning(f"  Could not load tokenizer {hf_name}: {exc}")
                 continue

@@ -1,3 +1,0 @@
-model,max_sequence_length,mean_tokens,median_tokens,std_tokens,min_tokens,max_tokens,p25_tokens,p50_tokens,p75_tokens,p90_tokens,p95_tokens,p99_tokens,overflow_count,overflow_percentage
-CodeBERT,512,183.65492193154793,76.0,1722.8266120234389,0,702680,41.0,76.0,173.0,390.0,632.0,1540.0,13205,6.827111984282908
-CodeT5-small,512,183.65492193154793,76.0,1722.8266120234389,0,702680,41.0,76.0,173.0,390.0,632.0,1540.0,13205,6.827111984282908

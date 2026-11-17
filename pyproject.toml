@@ -20,6 +20,8 @@ software-defects = "software_defects.cli:main"
 [dependency-groups]
 dev = [
     "ruff>=0.17.3",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
 ]
 
 [build-system]

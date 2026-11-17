@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
-from sklearn.metrics import average_precision_score, f1_score, matthews_corrcoef
+from sklearn.metrics import average_precision_score, f1_score, matthews_corrcoef, roc_auc_score
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -22,6 +22,7 @@ class EvaluationResult:
     threshold: float
     prevalence: float
     prevalence_baseline_pr_auc: float
+    roc_auc: float = float("nan")
 
 
 class DefectEvaluator:
@@ -58,6 +59,9 @@ class DefectEvaluator:
         # Calculate PR-AUC
         pr_auc = float(average_precision_score(y_true, y_scores))
 
+        # ROC-AUC is undefined when only one class is present
+        roc_auc = float(roc_auc_score(y_true, y_scores)) if len(np.unique(y_true)) > 1 else float("nan")
+
         # Select threshold if not provided
         if threshold is None:
             threshold = self._select_optimal_threshold(y_true, y_scores)
@@ -72,6 +76,7 @@ class DefectEvaluator:
         return EvaluationResult(
             pr_auc=pr_auc,
             f1=f1,
+            roc_auc=roc_auc,
             mcc=mcc,
             threshold=threshold,
             prevalence=prevalence,

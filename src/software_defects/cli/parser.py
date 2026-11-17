@@ -49,6 +49,8 @@ class ParserArgs:
                 "Repository_Level_Split",
                 "Within_Domain_ML_DL",
                 "Within_Domain_Non_ML",
+                "Group_KFold_ML_DL",
+                "Group_KFold_Non_ML",
             ],
             help="Split scenario to use (default: Repository_Level_Split).",
         )
@@ -56,7 +58,7 @@ class ParserArgs:
             "--output-dir",
             type=Path,
             default=None,
-            help="Directory to save processed data.",
+            help="Directory to save processed data (default: data/processed/defectors).",
         )
         parser.add_argument(
             "--commit-level",
@@ -92,5 +94,47 @@ class ParserArgs:
             help="Run the data processing pipeline.",
         )
         ParserArgs._add_pipeline_arguments(pipeline_parser)
+
+        baseline_parser = subparsers.add_parser(
+            "run-baseline",
+            help="Run the TF-IDF + Logistic Regression baseline.",
+        )
+        ParserArgs._add_dataset_arguments(baseline_parser)
+        baseline_parser.add_argument(
+            "--scenario",
+            type=str,
+            required=True,
+            choices=[
+                "ML_to_NonML",
+                "NonML_to_ML",
+                "Repository_Level_Split",
+                "Within_Domain_ML_DL",
+                "Within_Domain_Non_ML",
+                "Leave_Repo_Out_ML_DL",
+                "Leave_Repo_Out_Non_ML",
+                "Group_KFold_ML_DL",
+                "Group_KFold_Non_ML",
+                "Cross_Domain_Default",
+            ],
+            help="Split scenario to evaluate.",
+        )
+        baseline_parser.add_argument(
+            "--input-dir",
+            type=Path,
+            default=None,
+            help="Directory containing processed parquet files from pipeline (default: data/processed/defectors).",
+        )
+        baseline_parser.add_argument(
+            "--seeds",
+            type=str,
+            default="42",
+            help="Comma-separated random seeds, e.g. '42,43,44,45,46'.",
+        )
+        baseline_parser.add_argument(
+            "--equalize-train-size",
+            type=int,
+            default=None,
+            help="Subsample the training set to this many rows.",
+        )
 
         return parser

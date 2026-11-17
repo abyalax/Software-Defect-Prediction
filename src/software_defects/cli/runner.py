@@ -57,6 +57,10 @@ class RunnerCLI:
             dataset_name=dataset,
         )
 
+        # Use default output_dir if not provided
+        if output_dir is None:
+            output_dir = dataset_config.processed_dir
+
         # Convert scenario string to enum (handle underscore conversion)
         scenario_map = {
             "ML_to_NonML": SplitScenario.ML_TO_NON_ML,
@@ -64,6 +68,8 @@ class RunnerCLI:
             "Repository_Level_Split": SplitScenario.REPO_LEVEL_SPLIT,
             "Within_Domain_ML_DL": SplitScenario.WITHIN_DOMAIN_ML_DL,
             "Within_Domain_Non_ML": SplitScenario.WITHIN_DOMAIN_NON_ML,
+            "Group_KFold_ML_DL": SplitScenario.GROUP_KFOLD_ML_DL,
+            "Group_KFold_Non_ML": SplitScenario.GROUP_KFOLD_NON_ML,
         }
         scenario_enum = scenario_map.get(scenario)
         if scenario_enum is None:
@@ -76,5 +82,36 @@ class RunnerCLI:
             output_dir=output_dir,
             commit_level=commit_level,
             tokenize=tokenize,
+        )
+        return 0
+
+    @staticmethod
+    def run_baseline(
+        project_root: Path,
+        dataset: str,
+        scenario: str,
+        input_dir: Path | None,
+        seeds: list[int],
+        equalize_train_size: int | None,
+    ) -> int:
+        """Execute the TF-IDF + Logistic Regression baseline."""
+        from software_defects.config import DatasetConfig
+        from software_defects.data.defectors.split_generator import SplitScenario
+        from software_defects.models.baseline_experiment import BaselineExperiment
+
+        dataset_config = DatasetConfig(
+            project_root=project_root,
+            dataset_name=dataset,
+        )
+
+        # Use default input_dir if not provided
+        if input_dir is None:
+            input_dir = dataset_config.processed_dir
+
+        experiment = BaselineExperiment(config=dataset_config, input_dir=input_dir)
+        experiment.run(
+            scenario=SplitScenario(scenario),
+            seeds=seeds,
+            equalize_train_size=equalize_train_size,
         )
         return 0

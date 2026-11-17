@@ -1,0 +1,32 @@
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Defectors Data Pipeline
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Step 1: Loading data...
+  Loaded 213,420 records
+
+Step 2: Generating split (Group_KFold_Non_ML)...
+  Train: 115,317 samples (46.62% defective)
+  Test: 41,623 samples (36.58% defective)
+  Train repos: 16
+  Test repos: 1
+
+Step 4: Tokenizing (max_length=1024)...
+  Tokenizing with codebert (microsoft/codebert-base)...
+    Train - Mean tokens: 473.24, Truncated: 0.00%
+    Test - Mean tokens: 472.83, Truncated: 0.00%
+  Tokenizing with codet5 (Salesforce/codet5-small)...
+    Train - Mean tokens: 370.18, Truncated: 0.00%
+    Test - Mean tokens: 375.76, Truncated: 0.00%
+
+Step 5: Saving processed data...
+  Saved raw train to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\Group_KFold_Non_ML_train.parquet
+  Saved raw val to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\Group_KFold_Non_ML_val.parquet
+  Saved raw test to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\Group_KFold_Non_ML_test.parquet
+  Saved codebert train to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\codebert\Group_KFold_Non_ML_train.parquet
+  Saved codebert val to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\codebert\Group_KFold_Non_ML_val.parquet
+  Saved codebert test to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\codebert\Group_KFold_Non_ML_test.parquet
+  Saved codet5 train to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\codet5\Group_KFold_Non_ML_train.parquet
+  Saved codet5 val to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\codet5\Group_KFold_Non_ML_val.parquet
+  Saved codet5 test to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\codet5\Group_KFold_Non_ML_test.parquet

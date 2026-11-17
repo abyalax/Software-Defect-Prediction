@@ -1,6 +1,0 @@
-scenario,train_domain,test_domain,train_repositories,test_repositories,train_samples,test_samples,train_defective_pct,test_defective_pct,train_repos_list,test_repos_list
-ML_to_NonML,ml_dl,non_ml,7,17,40053,173366,45.72191845804309,43.46584682117601,,
-NonML_to_ML,non_ml,ml_dl,17,7,173366,40053,43.46584682117601,45.72191845804309,,
-Repository_Level_Split,mixed,mixed,20,4,158618,54801,46.01243238472305,37.74383679129943,"lightning, ray, scikit-learn, spaCy, transformers, yolov5, celery, core, cpython, django, django-rest-framework, localstack, numpy, openpilot, pandas, pipenv, poetry, redash, scrapy, sentry","jax, airflow, ansible, black"
-Within_Domain_ML_DL,ml_dl,ml_dl,6,1,39327,726,45.43951992269942,61.019283746556475,"lightning, ray, scikit-learn, spaCy, transformers, yolov5",jax
-Within_Domain_Non_ML,non_ml,non_ml,14,3,119291,54075,46.20130604991156,37.43134535367545,"celery, core, cpython, django, django-rest-framework, localstack, numpy, openpilot, pandas, pipenv, poetry, redash, scrapy, sentry","airflow, ansible, black"

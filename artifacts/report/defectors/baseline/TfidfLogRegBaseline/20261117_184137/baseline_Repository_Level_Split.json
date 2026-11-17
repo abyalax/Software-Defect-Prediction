@@ -1,0 +1,29 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-baseline --dataset defectors --scenario Repository_Level_Split --seeds 42,43,44",
+  "scenario": "Repository_Level_Split",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "equalize_train_size": null,
+  "n_runs": 3,
+  "mean": {
+    "pr_auc": 0.4823,
+    "f1": 0.5557,
+    "mcc": 0.1162,
+    "roc_auc": 0.6004,
+    "train_seconds": 75.9066,
+    "inference_seconds": 15.4928
+  },
+  "std": {
+    "pr_auc": 0.0,
+    "f1": 0.0,
+    "mcc": 0.0,
+    "roc_auc": 0.0,
+    "train_seconds": 33.2153,
+    "inference_seconds": 5.4796
+  },
+  "results_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\TfidfLogRegBaseline\\20261117_184137\\baseline_results.csv",
+  "per_repo_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\TfidfLogRegBaseline\\20261117_184137\\baseline_per_repo.csv"
+}

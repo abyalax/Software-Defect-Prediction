@@ -31,6 +31,14 @@ class CommandCLI:
                 arguments.commit_level,
                 not arguments.no_tokenize,
             ),
+            "run-baseline": lambda: RunnerCLI.run_baseline(
+                project_root,
+                arguments.dataset,
+                arguments.scenario,
+                arguments.input_dir,
+                [int(seed) for seed in arguments.seeds.split(",")],
+                arguments.equalize_train_size,
+            ),
         }
 
         try:
