@@ -138,10 +138,10 @@ class DefectorsDataPipeline:
             test_stats = self._tokenizer.get_statistics(test_df)
 
             self._reporter.display_text(
-                f"  Train - Mean tokens: {train_stats['mean']:.2f}, Truncated: {train_stats.get('truncated_percentage', 0):.2f}%"
+                f"  Train - Mean tokens: {train_stats['mean']:.2f}, Truncated: {train_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
             )
             self._reporter.display_text(
-                f"  Test - Mean tokens: {test_stats['mean']:.2f}, Truncated: {test_stats.get('truncated_percentage', 0):.2f}%"
+                f"  Test - Mean tokens: {test_stats['mean']:.2f}, Truncated: {test_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
             )
             self._reporter.display_text()
 
@@ -161,7 +161,7 @@ class DefectorsDataPipeline:
 
         # Step 5: Save if output directory provided
         if output_dir is not None:
-            self._reporter.display_text(f"Step 5: Saving processed data...")
+            self._reporter.display_text("Step 5: Saving processed data...")
             output_dir = Path(output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
 

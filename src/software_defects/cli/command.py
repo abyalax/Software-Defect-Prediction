@@ -20,9 +20,8 @@ class CommandCLI:
         project_root = arguments.project_root.resolve()
 
         commands = {
-            "inspect-data": lambda: RunnerCLI.run_inspect_data(project_root, arguments.dataset, arguments.nrows),
-            "advanced-analysis": lambda: RunnerCLI.run_advanced_analysis(
-                project_root, arguments.dataset, arguments.nrows
+            "inspect-data": lambda: RunnerCLI.run_inspect_data(
+                project_root, arguments.dataset, arguments.nrows, arguments.checkpoints
             ),
             "run-pipeline": lambda: RunnerCLI.run_pipeline(
                 project_root,

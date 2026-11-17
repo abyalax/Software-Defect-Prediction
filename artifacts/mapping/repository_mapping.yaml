@@ -1,0 +1,78 @@
+# Repository domain mapping configuration for Defectors dataset
+# This file allows alternative mappings without modifying code
+
+ml_dl_repositories:
+  lightning:
+    domain: ml_dl
+    criteria: "Deep learning framework for PyTorch"
+    confidence: clear
+  jax:
+    domain: ml_dl
+    criteria: "Autograd and XLA for ML research"
+    confidence: clear
+  transformers:
+    domain: ml_dl
+    criteria: "Hugging Face Transformers - State-of-the-art NLP models"
+    confidence: clear
+  ray:
+    domain: ml_dl
+    criteria: "Distributed ML and RL framework"
+    confidence: clear
+  scikit-learn:
+    domain: ml_dl
+    criteria: "Classical machine learning library"
+    confidence: clear
+  yolov5:
+    domain: ml_dl
+    criteria: "Object detection deep learning model"
+    confidence: clear
+
+non_ml_repositories:
+  ansible:
+    domain: non_ml
+    criteria: "IT automation and configuration management"
+    confidence: clear
+  sentry:
+    domain: non_ml
+    criteria: "Error tracking and monitoring platform"
+    confidence: clear
+  django:
+    domain: non_ml
+    criteria: "Python web framework"
+    confidence: clear
+  airflow:
+    domain: non_ml
+    criteria: "Workflow orchestration platform"
+    confidence: clear
+  celery:
+    domain: non_ml
+    criteria: "Distributed task queue"
+    confidence: clear
+  homeassistant:
+    domain: non_ml
+    criteria: "Home automation platform"
+    confidence: clear
+
+ambiguous_repositories:
+  spacy:
+    domain: ambiguous
+    criteria: "NLP library - could be ML/DL or general NLP"
+    confidence: ambiguous
+  pandas:
+    domain: ambiguous
+    criteria: "Data manipulation library - data science but not ML"
+    confidence: ambiguous
+  numpy:
+    domain: ambiguous
+    criteria: "Numerical computing library - foundational for ML but not ML"
+    confidence: ambiguous
+  openpilot:
+    domain: ambiguous
+    criteria: "Self-driving car software - uses ML but is systems engineering"
+    confidence: ambiguous
+
+unmapped_repositories:
+  freqtrade:
+    domain: unmapped
+    criteria: "Cryptocurrency trading bot - only 1 record, unclear domain"
+    confidence: unknown

@@ -9,10 +9,10 @@ class RunnerCLI:
     """Runner for CLI commands."""
 
     @staticmethod
-    def run_inspect_data(project_root: Path, dataset: str, nrows: int | None) -> int:
-        """Execute dataset inspection using modular exploratories."""
+    def run_inspect_data(project_root: Path, dataset: str, nrows: int | None, checkpoints: str | None) -> int:
+        """Execute dataset exploratory with specified checkpoints."""
         from software_defects.config import DatasetConfig
-        from software_defects.data.defectors import DefectorsDatasetExplorer
+        from software_defects.data.defectors.dataset_explorer import DefectorsDatasetExplorer
 
         dataset_config = DatasetConfig(
             project_root=project_root,
@@ -20,26 +20,22 @@ class RunnerCLI:
             row_limit=nrows,
         )
 
-        # Use the modular exploratory
-        explorer = DefectorsDatasetExplorer(config=dataset_config)
+        # Parse checkpoints argument
+        checkpoint_list = None
+        if checkpoints is not None:
+            checkpoint_list = []
+            for part in checkpoints.split(","):
+                part = part.strip()
+                if "-" in part:
+                    # Handle range like "5-7"
+                    start, end = map(int, part.split("-"))
+                    checkpoint_list.extend(range(start, end + 1))
+                else:
+                    checkpoint_list.append(int(part))
+
+        # Use the dataset explorer with specified checkpoints
+        explorer = DefectorsDatasetExplorer(config=dataset_config, checkpoints=checkpoint_list)
         explorer.run()
-        return 0
-
-    @staticmethod
-    def run_advanced_analysis(project_root: Path, dataset: str, nrows: int | None) -> int:
-        """Execute advanced analysis on the dataset."""
-        from software_defects.config import DatasetConfig
-        from software_defects.data.defectors.advanced_analysis import DefectorsAdvancedAnalysis
-
-        dataset_config = DatasetConfig(
-            project_root=project_root,
-            dataset_name=dataset,
-            row_limit=nrows,
-        )
-
-        # Use the advanced analysis module
-        analyzer = DefectorsAdvancedAnalysis(config=dataset_config)
-        analyzer.run()
         return 0
 
     @staticmethod

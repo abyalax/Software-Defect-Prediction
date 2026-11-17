@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pandas as pd
+
 from software_defects.reporting.console_report import ConsoleReporter
 from software_defects.reporting.json_report import JsonReportWriter
 
@@ -51,6 +52,7 @@ class ReportWritter:
         self._pipeline = pipeline
         self._class_name = class_name
         self._command = self._get_command_line()
+        self._timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     def _get_command_line(self) -> str:
         """Get the command captured by the launcher or Python invocation.
@@ -130,17 +132,14 @@ class ReportWritter:
         Returns:
             Path object for the report directory
         """
-        # Create timestamp for unique report directory
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-        # Build full path
+        # Build full path using the timestamp generated during initialization
         report_dir = (
             self._config.artifacts_dir
             / "report"
             / self._domain_data
             / self._pipeline
             / (self._class_name or "Unknown")
-            / timestamp
+            / self._timestamp
         )
 
         return report_dir
@@ -199,6 +198,41 @@ class ReportWritter:
         self._reporter.display_text(f"\nResult is saved on: {report_dir}")
 
         return report_dir
+
+    def save_csv(self, df: pd.DataFrame, filename: str) -> Path:
+        """Save a DataFrame as CSV to the report directory.
+
+        Args:
+            df: DataFrame to save
+            filename: Name for the CSV file
+
+        Returns:
+            Path to the saved CSV file
+        """
+        report_dir = self._get_report_path()
+        report_dir.mkdir(parents=True, exist_ok=True)
+        csv_path = report_dir / filename
+        df.to_csv(csv_path, index=False)
+        return csv_path
+
+    def save_json(self, data: dict | list, filename: str) -> Path:
+        """Save JSON data to the report directory.
+
+        Args:
+            data: Dictionary or list to save as JSON
+            filename: Name for the JSON file
+
+        Returns:
+            Path to the saved JSON file
+        """
+        import json
+
+        report_dir = self._get_report_path()
+        report_dir.mkdir(parents=True, exist_ok=True)
+        json_path = report_dir / filename
+        with open(json_path, "w") as f:
+            json.dump(data, f, indent=2)
+        return json_path
 
     def get_warnings(self) -> tuple[str, ...]:
         """Get warnings displayed so far."""

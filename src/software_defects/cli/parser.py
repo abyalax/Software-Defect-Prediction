@@ -29,6 +29,12 @@ class ParserArgs:
             default=None,
             help="Read only the first N rows (quick trial run).",
         )
+        parser.add_argument(
+            "--checkpoints",
+            type=str,
+            default=None,
+            help="Comma-separated list of checkpoint numbers to run (e.g., '1,3,5-7'). Runs all if not specified.",
+        )
 
     @staticmethod
     def _add_pipeline_arguments(parser: argparse.ArgumentParser) -> None:
@@ -80,12 +86,6 @@ class ParserArgs:
             help="Explore and summarize the input dataset.",
         )
         ParserArgs._add_dataset_arguments(inspect_parser)
-
-        advanced_parser = subparsers.add_parser(
-            "advanced-analysis",
-            help="Perform advanced analysis on the dataset.",
-        )
-        ParserArgs._add_dataset_arguments(advanced_parser)
 
         pipeline_parser = subparsers.add_parser(
             "run-pipeline",
