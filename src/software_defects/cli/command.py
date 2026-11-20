@@ -30,6 +30,7 @@ class CommandCLI:
                 arguments.output_dir,
                 arguments.commit_level,
                 not arguments.no_tokenize,
+                arguments.fold,
             ),
             "run-baseline": lambda: RunnerCLI.run_baseline(
                 project_root,
@@ -38,6 +39,9 @@ class CommandCLI:
                 arguments.input_dir,
                 [int(seed) for seed in arguments.seeds.split(",")],
                 arguments.equalize_train_size,
+                arguments.model,
+                arguments.exclude_repos,
+                arguments.fold,
             ),
         }
 

@@ -1,0 +1,37 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects inspect-data --dataset defectors --checkpoints 8,11,12,14",
+  "checkpoint_8": {
+    "current_is_repo_level": false,
+    "current_repo_overlap": 24,
+    "configured_test_ml_dl_repos": [
+      "jax",
+      "lightning"
+    ],
+    "configured_test_non_ml_repos": [
+      "airflow",
+      "ansible",
+      "black",
+      "celery"
+    ],
+    "split_recommendations_json": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261120_062125\\split_recommendations.json"
+  },
+  "checkpoint_11": {
+    "ml_to_non_ml_train_samples": 35573,
+    "ml_to_non_ml_test_samples": 170543,
+    "non_ml_to_ml_train_samples": 152465,
+    "non_ml_to_ml_test_samples": 39613,
+    "repo_level_split_train_samples": 128791,
+    "repo_level_split_test_samples": 67295,
+    "csv_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261120_062125\\split_report.csv"
+  },
+  "checkpoint_12": {
+    "codebert_overflow_pct": 36.582794489738546,
+    "codet5_small_overflow_pct": 25.534626557960827,
+    "csv_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261120_062125\\token_analysis.csv"
+  },
+  "checkpoint_14": {
+    "total_warnings": 0,
+    "combined_report_json": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261120_062125\\combined_run_report.json",
+    "combined_report_md": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261120_062125\\combined_run_report.md"
+  }
+}

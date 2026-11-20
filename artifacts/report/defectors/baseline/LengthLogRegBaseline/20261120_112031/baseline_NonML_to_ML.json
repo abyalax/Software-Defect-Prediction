@@ -1,0 +1,31 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-baseline --dataset defectors --scenario NonML_to_ML --model length --seeds 42,43,44",
+  "scenario": "NonML_to_ML",
+  "model": "length",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "equalize_train_size": null,
+  "exclude_repos": null,
+  "n_runs": 3,
+  "mean": {
+    "pr_auc": 0.5499,
+    "f1": 0.6532,
+    "mcc": 0.1996,
+    "roc_auc": 0.6138,
+    "train_seconds": 1.251,
+    "inference_seconds": 0.2699
+  },
+  "std": {
+    "pr_auc": 0.0,
+    "f1": 0.0,
+    "mcc": 0.0,
+    "roc_auc": 0.0,
+    "train_seconds": 0.0312,
+    "inference_seconds": 0.0187
+  },
+  "results_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\LengthLogRegBaseline\\20261120_112031\\baseline_results.csv",
+  "per_repo_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\LengthLogRegBaseline\\20261120_112031\\baseline_per_repo.csv"
+}

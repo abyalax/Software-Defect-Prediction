@@ -70,6 +70,13 @@ class ParserArgs:
             action="store_true",
             help="Skip tokenization step.",
         )
+        parser.add_argument(
+            "--fold",
+            type=int,
+            default=None,
+            choices=range(5),
+            help="Fold index (0-4) for the Group_KFold scenarios. Runs all 5 folds if not specified.",
+        )
 
     @staticmethod
     def build_parser() -> argparse.ArgumentParser:
@@ -110,8 +117,6 @@ class ParserArgs:
                 "Repository_Level_Split",
                 "Within_Domain_ML_DL",
                 "Within_Domain_Non_ML",
-                "Leave_Repo_Out_ML_DL",
-                "Leave_Repo_Out_Non_ML",
                 "Group_KFold_ML_DL",
                 "Group_KFold_Non_ML",
                 "Cross_Domain_Default",
@@ -131,10 +136,30 @@ class ParserArgs:
             help="Comma-separated random seeds, e.g. '42,43,44,45,46'.",
         )
         baseline_parser.add_argument(
+            "--model",
+            type=str,
+            default="tfidf",
+            choices=["tfidf", "length"],
+            help="Baseline model: TF-IDF + Logistic Regression (tfidf) or diff-size features only (length).",
+        )
+        baseline_parser.add_argument(
             "--equalize-train-size",
             type=int,
             default=None,
             help="Subsample the training set to this many rows.",
+        )
+        baseline_parser.add_argument(
+            "--exclude-repos",
+            type=str,
+            default=None,
+            help="Comma-separated list of repositories to exclude from the analysis (e.g., 'openpilot').",
+        )
+        baseline_parser.add_argument(
+            "--fold",
+            type=int,
+            default=None,
+            choices=range(5),
+            help="Fold index (0-4) for the Group_KFold scenarios. Runs all 5 folds if not specified.",
         )
 
         return parser

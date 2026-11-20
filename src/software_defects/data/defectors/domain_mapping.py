@@ -46,3 +46,38 @@ def load_domain_sets(project_root: Path) -> dict[str, set[str]]:
     """
     raw = load_repository_mapping(project_root)
     return {domain: set((raw.get(section) or {}).keys()) for section, domain in SECTION_TO_DOMAIN.items()}
+
+
+def load_holdout_repos(project_root: Path) -> dict[str, list[str]]:
+    """Return the explicit test-holdout repositories of each domain.
+
+    Args:
+        project_root: Project root that contains the ``artifacts`` directory.
+
+    Returns:
+        Dictionary with the keys ``ml_dl`` and ``non_ml`` mapping to sorted repository names.
+
+    Raises:
+        ValueError: If the ``holdout_repositories`` section is missing, a domain has no holdout,
+            a holdout repository is not mapped to that domain, or a whole domain is held out.
+    """
+    raw = load_repository_mapping(project_root)
+    holdout = raw.get("holdout_repositories")
+    if not holdout:
+        raise ValueError(f"Section 'holdout_repositories' is missing in {MAPPING_RELATIVE_PATH}")
+
+    holdout_repos: dict[str, list[str]] = {}
+    for section, domain in SECTION_TO_DOMAIN.items():
+        if domain not in ("ml_dl", "non_ml"):
+            continue
+        mapped = set((raw.get(section) or {}).keys())
+        repos = sorted(set(holdout.get(domain) or []))
+        if not repos:
+            raise ValueError(f"No holdout repositories configured for domain '{domain}'")
+        unknown = sorted(set(repos) - mapped)
+        if unknown:
+            raise ValueError(f"Holdout repositories not mapped to domain '{domain}': {unknown}")
+        if set(repos) == mapped:
+            raise ValueError(f"Holdout cannot contain every repository of domain '{domain}'")
+        holdout_repos[domain] = repos
+    return holdout_repos

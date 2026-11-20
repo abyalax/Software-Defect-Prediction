@@ -3,7 +3,8 @@
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
-from software_defects.data.defectors.domain_mapping import load_domain_sets
+from software_defects.data.defectors.domain_mapping import load_domain_sets, load_holdout_repos
+from software_defects.data.defectors.split_generator import DefectorsSplitGenerator
 from software_defects.reporting.reporter import ReportWritter
 
 
@@ -68,27 +69,19 @@ class SplitStrategyEvaluation:
             self._reporter.display_text("  INFO: Repository-level split will be used in pipeline to avoid data leakage")
         self._reporter.display_text()
 
-        # Improved split suggestions
+        # Repository-level holdout: explicit in the mapping YAML, shared with the split generator
         all_repos = sorted(train_repos.union(test_repos))
         all_ml_dl = [r for r in all_repos if r in ml_dl_repos]
         all_non_ml = [r for r in all_repos if r in non_ml_repos]
 
-        self._reporter.display_text("Recommended Split Strategy: Balanced Repository-Level Split")
+        holdout = load_holdout_repos(self._loader.config.project_root)
 
-        # Suggested test repos
-        if len(all_ml_dl) >= 2:
-            suggested_ml_test = all_ml_dl[:2]
-            suggested_ml_train = all_ml_dl[2:]
-        else:
-            suggested_ml_test = all_ml_dl[:1] if len(all_ml_dl) > 0 else []
-            suggested_ml_train = all_ml_dl[1:] if len(all_ml_dl) > 1 else []
+        self._reporter.display_text("Configured Repository-Level Holdout (artifacts/mapping/repository_mapping.yaml)")
 
-        if len(all_non_ml) >= 4:
-            suggested_non_ml_test = all_non_ml[:4]
-            suggested_non_ml_train = all_non_ml[4:]
-        else:
-            suggested_non_ml_test = all_non_ml[:2] if len(all_non_ml) > 0 else []
-            suggested_non_ml_train = all_non_ml[2:] if len(all_non_ml) > 2 else []
+        suggested_ml_test = [r for r in all_ml_dl if r in holdout["ml_dl"]]
+        suggested_ml_train = [r for r in all_ml_dl if r not in holdout["ml_dl"]]
+        suggested_non_ml_test = [r for r in all_non_ml if r in holdout["non_ml"]]
+        suggested_non_ml_train = [r for r in all_non_ml if r not in holdout["non_ml"]]
 
         self._reporter.display_text(f"  Test ML/DL repos: {suggested_ml_test}")
         self._reporter.display_text(f"  Test Non-ML repos: {suggested_non_ml_test}")
@@ -96,14 +89,17 @@ class SplitStrategyEvaluation:
         self._reporter.display_text(f"  Train Non-ML repos: {suggested_non_ml_train}")
         self._reporter.display_text()
 
-        # Calculate projected sample counts
-        all_data = pd.concat([train_no_freq, test_no_freq], ignore_index=True)
+        # Projected counts cover train + val + test of the original files and use the same
+        # filtering as the pipeline (freqtrade and empty-content rows removed)
+        jit_val = self._loader.load_jit_val()
+        generator = DefectorsSplitGenerator(self._loader.config)
+        all_data = generator.filter_data(pd.concat([jit_train, jit_test, jit_val], ignore_index=True))
         proj_train_ml = len(all_data[all_data["repo"].isin(suggested_ml_train)])
         proj_test_ml = len(all_data[all_data["repo"].isin(suggested_ml_test)])
         proj_train_non_ml = len(all_data[all_data["repo"].isin(suggested_non_ml_train)])
         proj_test_non_ml = len(all_data[all_data["repo"].isin(suggested_non_ml_test)])
 
-        self._reporter.display_text("Projected Sample Distribution:")
+        self._reporter.display_text("Projected Sample Distribution (train + val + test, after filtering):")
         self._reporter.display_text(f"  Train ML/DL: {proj_train_ml:,}")
         self._reporter.display_text(f"  Test ML/DL: {proj_test_ml:,}")
         self._reporter.display_text(f"  Train Non-ML: {proj_train_non_ml:,}")
@@ -120,7 +116,7 @@ class SplitStrategyEvaluation:
                 "is_repository_level": False,
                 "repo_overlap_count": len(train_repos.intersection(test_repos)),
             },
-            "suggested_repository_level_split": {
+            "configured_repository_level_split": {
                 "train_ml_dl_repos": suggested_ml_train,
                 "test_ml_dl_repos": suggested_ml_test,
                 "train_non_ml_repos": suggested_non_ml_train,
@@ -133,7 +129,7 @@ class SplitStrategyEvaluation:
             "issues_identified": [
                 "Current split is random record-level, not repository-level",
                 "All repositories overlap between train and test",
-                "Pipeline will use repository-level split to avoid data leakage",
+                "Pipeline will use the repository-level holdout configured in the mapping YAML",
             ],
         }
 
@@ -147,8 +143,8 @@ class SplitStrategyEvaluation:
                 "checkpoint_8": {
                     "current_is_repo_level": False,
                     "current_repo_overlap": len(train_repos.intersection(test_repos)),
-                    "suggested_test_ml_dl_repos": suggested_ml_test,
-                    "suggested_test_non_ml_repos": suggested_non_ml_test,
+                    "configured_test_ml_dl_repos": suggested_ml_test,
+                    "configured_test_non_ml_repos": suggested_non_ml_test,
                     "split_recommendations_json": str(json_path),
                 }
             }

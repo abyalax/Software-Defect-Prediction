@@ -1,0 +1,65 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-pipeline --dataset defectors --scenario Group_KFold_ML_DL",
+  "total_records": 213420,
+  "train_records": 193420,
+  "test_records": 10000,
+  "val_records": 10000,
+  "scenario": "Group_KFold_ML_DL",
+  "fold": 1,
+  "train_samples": 25672,
+  "test_samples": 11014,
+  "train_defective_pct": 45.83203490183858,
+  "test_defective_pct": 48.74704921009624,
+  "train_repos": [
+    "jax",
+    "ray",
+    "scikit-learn",
+    "spaCy",
+    "transformers",
+    "yolov5"
+  ],
+  "test_repos": [
+    "lightning"
+  ],
+  "commit_level": false,
+  "tokenize": true,
+  "tokenizer_stats": {
+    "codebert": {
+      "tokenizer_model": "microsoft/codebert-base",
+      "tokenizer_max_length": 512,
+      "train_mean_tokens": 363.0552742287317,
+      "train_median_tokens": 418.5,
+      "train_truncated_pct": 0.0,
+      "test_mean_tokens": 335.6072271654258,
+      "test_median_tokens": 328.0,
+      "test_truncated_pct": 0.0
+    },
+    "codet5": {
+      "tokenizer_model": "Salesforce/codet5-small",
+      "tokenizer_max_length": 512,
+      "train_mean_tokens": 314.6047444686818,
+      "train_median_tokens": 293.0,
+      "train_truncated_pct": 0.0,
+      "test_mean_tokens": 284.9467949881968,
+      "test_median_tokens": 244.0,
+      "test_truncated_pct": 0.0
+    }
+  },
+  "output_dir": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors",
+  "scenario_dir": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1",
+  "train_path": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\Group_KFold_ML_DL_train.parquet",
+  "val_path": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\Group_KFold_ML_DL_val.parquet",
+  "test_path": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\Group_KFold_ML_DL_test.parquet",
+  "model_paths": {
+    "codebert": {
+      "train": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\codebert\\Group_KFold_ML_DL_train.parquet",
+      "val": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\codebert\\Group_KFold_ML_DL_val.parquet",
+      "test": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\codebert\\Group_KFold_ML_DL_test.parquet"
+    },
+    "codet5": {
+      "train": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\codet5\\Group_KFold_ML_DL_train.parquet",
+      "val": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\codet5\\Group_KFold_ML_DL_val.parquet",
+      "test": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_ML_DL\\fold_1\\codet5\\Group_KFold_ML_DL_test.parquet"
+    }
+  }
+}

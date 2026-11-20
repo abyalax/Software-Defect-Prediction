@@ -3,188 +3,90 @@
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
-from software_defects.data.defectors.domain_mapping import load_domain_sets
+from software_defects.data.defectors.split_generator import DefectorsSplitGenerator, SplitResult, SplitScenario
 from software_defects.reporting.reporter import ReportWritter
+
+# Scenarios simulated here, with the domain of the train and test side
+SIMULATED_SCENARIOS: list[tuple[SplitScenario, str, str]] = [
+    (SplitScenario.ML_TO_NON_ML, "ml_dl", "non_ml"),
+    (SplitScenario.NON_ML_TO_ML, "non_ml", "ml_dl"),
+    (SplitScenario.REPO_LEVEL_SPLIT, "mixed", "mixed"),
+    (SplitScenario.WITHIN_DOMAIN_ML_DL, "ml_dl", "ml_dl"),
+    (SplitScenario.WITHIN_DOMAIN_NON_ML, "non_ml", "non_ml"),
+]
 
 
 class RepositorySplit:
-    """Checkpoint 11: Repository-level split simulation (ML ↔ non-ML)."""
+    """Checkpoint 11: Repository-level split simulation (ML ↔ non-ML).
+
+    The numbers come from the same ``DefectorsSplitGenerator`` the pipeline uses, so the report always
+    matches the splits that are actually trained on (holdout from the mapping YAML, freqtrade and
+    empty-content rows removed, validation carved out of the training side).
+    """
 
     def __init__(self, loader: DefectorsDatasetLoader, reporter: ReportWritter) -> None:
         self._loader = loader
         self._reporter = reporter
+
+    @staticmethod
+    def _to_row(result: SplitResult, train_domain: str, test_domain: str) -> dict:
+        """Convert a split result into one report row."""
+        return {
+            "scenario": result.scenario,
+            "train_domain": train_domain,
+            "test_domain": test_domain,
+            "train_repositories": len(result.train_repos),
+            "test_repositories": len(result.test_repos),
+            "train_samples": result.train_samples,
+            "val_samples": result.val_samples,
+            "test_samples": result.test_samples,
+            "train_defective_pct": result.train_defective_pct,
+            "val_defective_pct": result.val_defective_pct,
+            "test_defective_pct": result.test_defective_pct,
+            "train_repos_list": ", ".join(result.train_repos),
+            "test_repos_list": ", ".join(result.test_repos),
+        }
 
     def run(self) -> None:
         """Execute repository-level split analysis."""
         self._reporter.display_section("Checkpoint 11: Repository-Level Split Analysis")
         self._reporter.display_text()
 
-        # Load all JIT data
-        jit_train = self._loader.load_jit_train()
-        jit_test = self._loader.load_jit_test()
-        jit_val = self._loader.load_jit_val()
-        all_jit = pd.concat([jit_train, jit_test, jit_val], ignore_index=True)
+        # Raw data of all three original files; the generator applies the pipeline filtering itself
+        all_jit = self._loader.load_all_jit()
+        generator = DefectorsSplitGenerator(self._loader.config)
 
-        # Exclude freqtrade (only 1 record)
-        all_jit = all_jit[all_jit["repo"] != "freqtrade"]
+        rows = []
+        for scenario, train_domain, test_domain in SIMULATED_SCENARIOS:
+            result = generator.generate_split(all_jit, scenario)
+            rows.append(self._to_row(result, train_domain, test_domain))
+            self._reporter.display_text(
+                f"  {scenario.value}: train {result.train_samples:,} / val {result.val_samples:,} / "
+                f"test {result.test_samples:,} (test repos: {', '.join(result.test_repos)})"
+            )
+        self._reporter.display_text()
 
-        # Domains come from the shared YAML; ambiguous repos are excluded
-        domain_sets = load_domain_sets(self._loader.config.project_root)
-        ml_dl_repos = domain_sets["ml_dl"]
-        non_ml_repos = domain_sets["non_ml"]
-
-        # Calculate binary labels
-        all_jit["label"] = all_jit["lines"].apply(
-            lambda x: 1 if len(x) > 0 else 0 if isinstance(x, (list, type(all_jit["lines"].iloc[0]))) else 0
-        )
-
-        # Scenario 1: Train on ML/DL, Test on Non-ML
-        ml_dl_df = all_jit[all_jit["repo"].isin(ml_dl_repos)]
-        non_ml_df = all_jit[all_jit["repo"].isin(non_ml_repos)]
-
-        scenario_1 = {
-            "scenario": "ML_to_NonML",
-            "train_domain": "ml_dl",
-            "test_domain": "non_ml",
-            "train_repositories": len(ml_dl_df["repo"].unique()),
-            "test_repositories": len(non_ml_df["repo"].unique()),
-            "train_samples": len(ml_dl_df),
-            "test_samples": len(non_ml_df),
-            "train_defective_pct": float(ml_dl_df["label"].mean() * 100) if len(ml_dl_df) > 0 else 0,
-            "test_defective_pct": float(non_ml_df["label"].mean() * 100) if len(non_ml_df) > 0 else 0,
-        }
-
-        # Scenario 2: Train on Non-ML, Test on ML/DL
-        scenario_2 = {
-            "scenario": "NonML_to_ML",
-            "train_domain": "non_ml",
-            "test_domain": "ml_dl",
-            "train_repositories": len(non_ml_df["repo"].unique()),
-            "test_repositories": len(ml_dl_df["repo"].unique()),
-            "train_samples": len(non_ml_df),
-            "test_samples": len(ml_dl_df),
-            "train_defective_pct": float(non_ml_df["label"].mean() * 100) if len(non_ml_df) > 0 else 0,
-            "test_defective_pct": float(ml_dl_df["label"].mean() * 100) if len(ml_dl_df) > 0 else 0,
-        }
-
-        # Scenario 3: Repository-level split (holdout some repos from each domain)
-        all_repos = sorted(all_jit["repo"].unique())
-        ml_dl_repo_list = [r for r in all_repos if r in ml_dl_repos]
-        non_ml_repo_list = [r for r in all_repos if r in non_ml_repos]
-
-        # Holdout 1 ML/DL repo and 3 Non-ML repos for test
-        if len(ml_dl_repo_list) > 1:
-            ml_dl_test_repos = [ml_dl_repo_list[0]]
-            ml_dl_train_repos = ml_dl_repo_list[1:]
-        else:
-            ml_dl_test_repos = []
-            ml_dl_train_repos = ml_dl_repo_list
-
-        if len(non_ml_repo_list) > 3:
-            non_ml_test_repos = non_ml_repo_list[:3]
-            non_ml_train_repos = non_ml_repo_list[3:]
-        else:
-            non_ml_test_repos = non_ml_repo_list[:1] if len(non_ml_repo_list) > 0 else []
-            non_ml_train_repos = non_ml_repo_list[1:] if len(non_ml_repo_list) > 1 else []
-
-        train_repos = ml_dl_train_repos + non_ml_train_repos
-        test_repos = ml_dl_test_repos + non_ml_test_repos
-
-        train_df = all_jit[all_jit["repo"].isin(train_repos)]
-        test_df = all_jit[all_jit["repo"].isin(test_repos)]
-
-        scenario_3 = {
-            "scenario": "Repository_Level_Split",
-            "train_domain": "mixed",
-            "test_domain": "mixed",
-            "train_repositories": len(train_repos),
-            "test_repositories": len(test_repos),
-            "train_samples": len(train_df),
-            "test_samples": len(test_df),
-            "train_defective_pct": float(train_df["label"].mean() * 100) if len(train_df) > 0 else 0,
-            "test_defective_pct": float(test_df["label"].mean() * 100) if len(test_df) > 0 else 0,
-            "train_repos_list": ", ".join(train_repos),
-            "test_repos_list": ", ".join(test_repos),
-        }
-
-        # Scenario 4: Within-domain ML/DL split (holdout 1 ML/DL repo)
-        if len(ml_dl_repo_list) > 1:
-            ml_dl_within_test_repos = [ml_dl_repo_list[0]]
-            ml_dl_within_train_repos = ml_dl_repo_list[1:]
-
-            ml_dl_within_train_df = all_jit[all_jit["repo"].isin(ml_dl_within_train_repos)]
-            ml_dl_within_test_df = all_jit[all_jit["repo"].isin(ml_dl_within_test_repos)]
-
-            scenario_4 = {
-                "scenario": "Within_Domain_ML_DL",
-                "train_domain": "ml_dl",
-                "test_domain": "ml_dl",
-                "train_repositories": len(ml_dl_within_train_repos),
-                "test_repositories": len(ml_dl_within_test_repos),
-                "train_samples": len(ml_dl_within_train_df),
-                "test_samples": len(ml_dl_within_test_df),
-                "train_defective_pct": float(ml_dl_within_train_df["label"].mean() * 100)
-                if len(ml_dl_within_train_df) > 0
-                else 0,
-                "test_defective_pct": float(ml_dl_within_test_df["label"].mean() * 100)
-                if len(ml_dl_within_test_df) > 0
-                else 0,
-                "train_repos_list": ", ".join(ml_dl_within_train_repos),
-                "test_repos_list": ", ".join(ml_dl_within_test_repos),
-            }
-        else:
-            scenario_4 = None
-
-        # Scenario 5: Within-domain Non-ML split (holdout 3 Non-ML repos)
-        if len(non_ml_repo_list) > 3:
-            non_ml_within_test_repos = non_ml_repo_list[:3]
-            non_ml_within_train_repos = non_ml_repo_list[3:]
-
-            non_ml_within_train_df = all_jit[all_jit["repo"].isin(non_ml_within_train_repos)]
-            non_ml_within_test_df = all_jit[all_jit["repo"].isin(non_ml_within_test_repos)]
-
-            scenario_5 = {
-                "scenario": "Within_Domain_Non_ML",
-                "train_domain": "non_ml",
-                "test_domain": "non_ml",
-                "train_repositories": len(non_ml_within_train_repos),
-                "test_repositories": len(non_ml_within_test_repos),
-                "train_samples": len(non_ml_within_train_df),
-                "test_samples": len(non_ml_within_test_df),
-                "train_defective_pct": float(non_ml_within_train_df["label"].mean() * 100)
-                if len(non_ml_within_train_df) > 0
-                else 0,
-                "test_defective_pct": float(non_ml_within_test_df["label"].mean() * 100)
-                if len(non_ml_within_test_df) > 0
-                else 0,
-                "train_repos_list": ", ".join(non_ml_within_train_repos),
-                "test_repos_list": ", ".join(non_ml_within_test_repos),
-            }
-        else:
-            scenario_5 = None
-
-        # Create CSV
-        split_data = [scenario_1, scenario_2, scenario_3]
-        if scenario_4 is not None:
-            split_data.append(scenario_4)
-        if scenario_5 is not None:
-            split_data.append(scenario_5)
-        split_df = pd.DataFrame(split_data)
+        split_df = pd.DataFrame(rows)
         csv_path = self._reporter.save_csv(split_df, "split_report.csv")
 
         self._reporter.display_text(f"Split report saved to: {csv_path}")
         self._reporter.display_text()
 
+        by_scenario = {row["scenario"]: row for row in rows}
+        ml_to_non_ml = by_scenario[SplitScenario.ML_TO_NON_ML.value]
+        non_ml_to_ml = by_scenario[SplitScenario.NON_ML_TO_ML.value]
+        repo_level = by_scenario[SplitScenario.REPO_LEVEL_SPLIT.value]
+
         # Update summary
         self._reporter.update_summary(
             {
                 "checkpoint_11": {
-                    "ml_to_non_ml_train_samples": scenario_1["train_samples"],
-                    "ml_to_non_ml_test_samples": scenario_1["test_samples"],
-                    "non_ml_to_ml_train_samples": scenario_2["train_samples"],
-                    "non_ml_to_ml_test_samples": scenario_2["test_samples"],
-                    "repo_level_split_train_samples": scenario_3["train_samples"],
-                    "repo_level_split_test_samples": scenario_3["test_samples"],
+                    "ml_to_non_ml_train_samples": ml_to_non_ml["train_samples"],
+                    "ml_to_non_ml_test_samples": ml_to_non_ml["test_samples"],
+                    "non_ml_to_ml_train_samples": non_ml_to_ml["train_samples"],
+                    "non_ml_to_ml_test_samples": non_ml_to_ml["test_samples"],
+                    "repo_level_split_train_samples": repo_level["train_samples"],
+                    "repo_level_split_test_samples": repo_level["test_samples"],
                     "csv_path": str(csv_path),
                 }
             }

@@ -1,0 +1,2 @@
+scenario,model,fold,seed,n_train,n_val,n_test,train_repos,test_repos,train_defective_pct,test_defective_pct,pr_auc,prevalence_baseline_pr_auc,f1,mcc,roc_auc,threshold,best_c,n_features,train_seconds,inference_seconds
+Group_KFold_ML_DL,tfidf,0,42,19839,2283,17491,jax;lightning;scikit-learn;spaCy;transformers;yolov5,ray,49.75049145622259,42.33605854439426,0.4692902752363143,0.4233605854439426,0.5951029674071672,0.032161691348437625,0.5539255850060847,0.24242424242424243,1.0,100000,6.634080899995752,2.3657986999605782

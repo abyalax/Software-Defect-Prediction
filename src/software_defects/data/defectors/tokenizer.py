@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -19,7 +18,7 @@ class DefectorsTokenizer:
         self,
         config: DatasetConfig,
         model_name: str = "microsoft/codebert-base",
-        max_length: int = 1024,
+        max_length: int = 512,
     ) -> None:
         """Initialize the tokenizer.
 

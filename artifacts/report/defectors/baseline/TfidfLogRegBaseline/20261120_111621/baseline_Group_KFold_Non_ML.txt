@@ -1,0 +1,52 @@
+
+----------------------------------------------------------------------------------------------------------------
+TfidfLogRegBaseline (Group_KFold_Non_ML)
+----------------------------------------------------------------------------------------------------------------
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\fold_0
+  Train: 115,317 samples
+  Val: 13,603 samples
+  Test: 41,623 samples
+
+  fold=0 seed=42: PR-AUC=0.4427 F1=0.5166 MCC=0.1085 ROC-AUC=0.5813 (train 102.7s, inference 7.5s)
+  fold=0 seed=43: PR-AUC=0.4427 F1=0.5166 MCC=0.1085 ROC-AUC=0.5813 (train 52.1s, inference 6.8s)
+  fold=0 seed=44: PR-AUC=0.4427 F1=0.5166 MCC=0.1085 ROC-AUC=0.5813 (train 50.0s, inference 7.3s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\fold_1
+  Train: 120,442 samples
+  Val: 13,108 samples
+  Test: 36,993 samples
+
+  fold=1 seed=42: PR-AUC=0.4876 F1=0.5508 MCC=0.1383 ROC-AUC=0.6246 (train 44.2s, inference 4.3s)
+  fold=1 seed=43: PR-AUC=0.4876 F1=0.5508 MCC=0.1383 ROC-AUC=0.6246 (train 37.8s, inference 3.9s)
+  fold=1 seed=44: PR-AUC=0.4876 F1=0.5508 MCC=0.1383 ROC-AUC=0.6246 (train 37.9s, inference 3.9s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\fold_2
+  Train: 121,711 samples
+  Val: 12,921 samples
+  Test: 35,911 samples
+
+  fold=2 seed=42: PR-AUC=0.6691 F1=0.6766 MCC=0.0760 ROC-AUC=0.5701 (train 39.5s, inference 3.6s)
+  fold=2 seed=43: PR-AUC=0.6691 F1=0.6766 MCC=0.0760 ROC-AUC=0.5701 (train 40.6s, inference 3.5s)
+  fold=2 seed=44: PR-AUC=0.6691 F1=0.6766 MCC=0.0760 ROC-AUC=0.5701 (train 39.9s, inference 3.5s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\fold_3
+  Train: 128,507 samples
+  Val: 13,912 samples
+  Test: 28,124 samples
+
+  fold=3 seed=42: PR-AUC=0.5364 F1=0.6054 MCC=0.1304 ROC-AUC=0.6099 (train 42.8s, inference 3.4s)
+  fold=3 seed=43: PR-AUC=0.5364 F1=0.6054 MCC=0.1304 ROC-AUC=0.6099 (train 53.6s, inference 3.9s)
+  fold=3 seed=44: PR-AUC=0.5364 F1=0.6054 MCC=0.1304 ROC-AUC=0.6099 (train 81.1s, inference 6.0s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_Non_ML\fold_4
+  Train: 128,157 samples
+  Val: 14,494 samples
+  Test: 27,892 samples
+
+  fold=4 seed=42: PR-AUC=0.5397 F1=0.5890 MCC=0.1229 ROC-AUC=0.5926 (train 54.2s, inference 3.4s)
+  fold=4 seed=43: PR-AUC=0.5397 F1=0.5890 MCC=0.1229 ROC-AUC=0.5926 (train 51.4s, inference 4.1s)
+  fold=4 seed=44: PR-AUC=0.5397 F1=0.5890 MCC=0.1229 ROC-AUC=0.5926 (train 50.7s, inference 3.3s)
+
+Mean and standard deviation over runs:
+┌──────┬────────┬────────┬────────┬─────────┬───────────────┬───────────────────┐
+│      │ pr_auc │ f1     │ mcc    │ roc_auc │ train_seconds │ inference_seconds │
+├──────┼────────┼────────┼────────┼─────────┼───────────────┼───────────────────┤
+│ mean │ 0.5351 │ 0.5877 │ 0.1152 │ 0.5957  │ 51.8938       │ 4.5628            │
+│ std  │ 0.0785 │ 0.056  │ 0.0227 │ 0.0202  │ 17.7477       │ 1.5066            │
+└──────┴────────┴────────┴────────┴─────────┴───────────────┴───────────────────┘

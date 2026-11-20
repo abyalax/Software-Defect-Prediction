@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoader
-from software_defects.data.defectors.split_generator import DefectorsSplitGenerator, SplitScenario
+from software_defects.data.defectors.split_generator import (
+    GROUP_KFOLD_SCENARIOS,
+    DefectorsSplitGenerator,
+    SplitScenario,
+)
 from software_defects.data.defectors.tokenizer import DefectorsTokenizer
 from software_defects.reporting.reporter import ReportWritter
 
@@ -49,6 +53,7 @@ class DefectorsDataPipeline:
         output_dir: Path | None = None,
         commit_level: bool = False,
         tokenize: bool = True,
+        fold: int = 0,
     ) -> tuple[pd.DataFrame, pd.DataFrame] | dict[str, dict[str, pd.DataFrame]]:
         """Run the complete data processing pipeline.
 
@@ -57,6 +62,7 @@ class DefectorsDataPipeline:
             output_dir: Directory to save processed data. If None, data is not saved.
             commit_level: Whether to aggregate to commit-level.
             tokenize: Whether to apply tokenization.
+            fold: Fold index (0 to 4), only used by the Group K-Fold scenarios.
 
         Returns:
             If tokenize=True: Dict mapping model keys to {train, val, test} DataFrames.
@@ -85,8 +91,9 @@ class DefectorsDataPipeline:
         )
 
         # Step 2: Generate split
-        self._reporter.display_text(f"Step 2: Generating split ({scenario.value})...")
-        split_result = self._split_generator.generate_split(all_data, scenario)
+        fold_label = f", fold {fold}" if scenario in GROUP_KFOLD_SCENARIOS else ""
+        self._reporter.display_text(f"Step 2: Generating split ({scenario.value}{fold_label})...")
+        split_result = self._split_generator.generate_split(all_data, scenario, fold=fold)
         self._reporter.display_text(
             f"  Train: {split_result.train_samples:,} samples ({split_result.train_defective_pct:.2f}% defective)"
         )
@@ -101,6 +108,7 @@ class DefectorsDataPipeline:
         self._reporter.update_summary(
             {
                 "scenario": scenario.value,
+                "fold": fold if scenario in GROUP_KFOLD_SCENARIOS else None,
                 "train_samples": split_result.train_samples,
                 "test_samples": split_result.test_samples,
                 "train_defective_pct": split_result.train_defective_pct,
@@ -180,8 +188,8 @@ class DefectorsDataPipeline:
             self._reporter.display_text("Step 5: Saving processed data...")
             output_dir = Path(output_dir)
 
-            # Create scenario-specific subfolder
-            scenario_dir = output_dir / scenario.value
+            # Create scenario-specific subfolder (one per fold for Group K-Fold)
+            scenario_dir = self._split_generator.scenario_dir(output_dir, scenario, fold)
             scenario_dir.mkdir(parents=True, exist_ok=True)
 
             # Save non-tokenized data (raw split)
@@ -237,9 +245,10 @@ class DefectorsDataPipeline:
             self._reporter.update_summary(output_summary)
 
         # Save reports
+        report_name = f"pipeline_{scenario.value}" + (f"_fold{fold}" if scenario in GROUP_KFOLD_SCENARIOS else "")
         self._reporter.save_reports(
-            text_filename=f"pipeline_{scenario.value}.txt",
-            json_filename=f"pipeline_{scenario.value}.json",
+            text_filename=f"{report_name}.txt",
+            json_filename=f"{report_name}.json",
         )
 
         # Return tokenized data if available, otherwise return raw data

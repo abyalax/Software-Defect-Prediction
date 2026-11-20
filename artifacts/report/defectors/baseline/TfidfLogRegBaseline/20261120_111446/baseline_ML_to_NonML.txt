@@ -1,0 +1,20 @@
+
+----------------------------------------------------------------------------------------------------------------
+TfidfLogRegBaseline (ML_to_NonML)
+----------------------------------------------------------------------------------------------------------------
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\ML_to_NonML
+  Train: 35,573 samples
+  Val: 4,040 samples
+  Test: 170,543 samples
+
+  fold=0 seed=42: PR-AUC=0.5010 F1=0.6063 MCC=0.0846 ROC-AUC=0.5710 (train 11.8s, inference 28.7s)
+  fold=0 seed=43: PR-AUC=0.5010 F1=0.6063 MCC=0.0846 ROC-AUC=0.5710 (train 21.6s, inference 66.3s)
+  fold=0 seed=44: PR-AUC=0.5010 F1=0.6063 MCC=0.0846 ROC-AUC=0.5710 (train 35.7s, inference 37.3s)
+
+Mean and standard deviation over runs:
+┌──────┬────────┬────────┬────────┬─────────┬───────────────┬───────────────────┐
+│      │ pr_auc │ f1     │ mcc    │ roc_auc │ train_seconds │ inference_seconds │
+├──────┼────────┼────────┼────────┼─────────┼───────────────┼───────────────────┤
+│ mean │ 0.501  │ 0.6063 │ 0.0846 │ 0.571   │ 23.044        │ 44.1095           │
+│ std  │ 0.0    │ 0.0    │ 0.0    │ 0.0     │ 12.0012       │ 19.7122           │
+└──────┴────────┴────────┴────────┴─────────┴───────────────┴───────────────────┘

@@ -1,0 +1,42 @@
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+TfidfLogRegBaseline (Group_KFold_ML_DL)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0
+  Train: 19,839 samples
+  Val: 2,283 samples
+  Test: 17,491 samples
+
+  fold=0 seed=42: PR-AUC=0.4693 F1=0.5951 MCC=0.0322 ROC-AUC=0.5539 (train 5.6s, inference 2.1s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_1
+  Train: 25,672 samples
+  Val: 2,927 samples
+  Test: 11,014 samples
+
+  fold=1 seed=42: PR-AUC=0.5177 F1=0.3398 MCC=0.0400 ROC-AUC=0.5391 (train 7.8s, inference 1.1s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_2
+  Train: 31,434 samples
+  Val: 3,213 samples
+  Test: 4,966 samples
+
+  fold=2 seed=42: PR-AUC=0.5654 F1=0.6212 MCC=0.0969 ROC-AUC=0.5640 (train 8.7s, inference 0.6s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_3
+  Train: 32,915 samples
+  Val: 3,525 samples
+  Test: 3,173 samples
+
+  fold=3 seed=42: PR-AUC=0.6043 F1=0.5951 MCC=0.1121 ROC-AUC=0.5842 (train 9.6s, inference 0.5s)
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_4
+  Train: 32,856 samples
+  Val: 3,788 samples
+  Test: 2,969 samples
+
+  fold=4 seed=42: PR-AUC=0.4531 F1=0.5143 MCC=-0.0098 ROC-AUC=0.4947 (train 9.1s, inference 0.5s)
+
+Mean and standard deviation over runs:
+┌──────┬────────┬────────┬────────┬─────────┬───────────────┬───────────────────┐
+│      │ pr_auc │ f1     │ mcc    │ roc_auc │ train_seconds │ inference_seconds │
+├──────┼────────┼────────┼────────┼─────────┼───────────────┼───────────────────┤
+│ mean │ 0.522  │ 0.5331 │ 0.0543 │ 0.5472  │ 8.1907        │ 0.955             │
+│ std  │ 0.0636 │ 0.1153 │ 0.0499 │ 0.0336  │ 1.5919        │ 0.7092            │
+└──────┴────────┴────────┴────────┴─────────┴───────────────┴───────────────────┘

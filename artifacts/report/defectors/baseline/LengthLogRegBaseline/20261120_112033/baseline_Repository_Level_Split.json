@@ -1,0 +1,31 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-baseline --dataset defectors --scenario Repository_Level_Split --model length --seeds 42,43,44",
+  "scenario": "Repository_Level_Split",
+  "model": "length",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "equalize_train_size": null,
+  "exclude_repos": null,
+  "n_runs": 3,
+  "mean": {
+    "pr_auc": 0.5268,
+    "f1": 0.5831,
+    "mcc": 0.1312,
+    "roc_auc": 0.6369,
+    "train_seconds": 1.0112,
+    "inference_seconds": 0.3692
+  },
+  "std": {
+    "pr_auc": 0.0,
+    "f1": 0.0,
+    "mcc": 0.0,
+    "roc_auc": 0.0,
+    "train_seconds": 0.0272,
+    "inference_seconds": 0.0153
+  },
+  "results_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\LengthLogRegBaseline\\20261120_112033\\baseline_results.csv",
+  "per_repo_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\LengthLogRegBaseline\\20261120_112033\\baseline_per_repo.csv"
+}

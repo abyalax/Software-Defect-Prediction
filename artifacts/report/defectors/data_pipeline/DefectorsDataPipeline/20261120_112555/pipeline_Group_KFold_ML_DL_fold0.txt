@@ -1,0 +1,32 @@
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Defectors Data Pipeline
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Step 1: Loading data...
+  Loaded 213,420 records
+
+Step 2: Generating split (Group_KFold_ML_DL, fold 0)...
+  Train: 19,839 samples (49.75% defective)
+  Test: 17,491 samples (42.34% defective)
+  Train repos: 6
+  Test repos: 1
+
+Step 4: Tokenizing (max_length=512)...
+  Tokenizing with codebert (microsoft/codebert-base)...
+    Train - Mean tokens: 348.48, Truncated: 0.00%
+    Test - Mean tokens: 364.37, Truncated: 0.00%
+  Tokenizing with codet5 (Salesforce/codet5-small)...
+    Train - Mean tokens: 301.68, Truncated: 0.00%
+    Test - Mean tokens: 312.18, Truncated: 0.00%
+
+Step 5: Saving processed data...
+  Saved raw train to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\Group_KFold_ML_DL_train.parquet
+  Saved raw val to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\Group_KFold_ML_DL_val.parquet
+  Saved raw test to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\Group_KFold_ML_DL_test.parquet
+  Saved codebert train to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\codebert\Group_KFold_ML_DL_train.parquet
+  Saved codebert val to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\codebert\Group_KFold_ML_DL_val.parquet
+  Saved codebert test to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\codebert\Group_KFold_ML_DL_test.parquet
+  Saved codet5 train to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\codet5\Group_KFold_ML_DL_train.parquet
+  Saved codet5 val to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\codet5\Group_KFold_ML_DL_val.parquet
+  Saved codet5 test to: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0\codet5\Group_KFold_ML_DL_test.parquet

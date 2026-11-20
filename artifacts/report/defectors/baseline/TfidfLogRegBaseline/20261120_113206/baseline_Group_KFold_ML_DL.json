@@ -1,0 +1,29 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-baseline --dataset defectors --scenario Group_KFold_ML_DL",
+  "scenario": "Group_KFold_ML_DL",
+  "model": "tfidf",
+  "seeds": [
+    42
+  ],
+  "equalize_train_size": null,
+  "exclude_repos": null,
+  "n_runs": 5,
+  "mean": {
+    "pr_auc": 0.522,
+    "f1": 0.5331,
+    "mcc": 0.0543,
+    "roc_auc": 0.5472,
+    "train_seconds": 8.1907,
+    "inference_seconds": 0.955
+  },
+  "std": {
+    "pr_auc": 0.0636,
+    "f1": 0.1153,
+    "mcc": 0.0499,
+    "roc_auc": 0.0336,
+    "train_seconds": 1.5919,
+    "inference_seconds": 0.7092
+  },
+  "results_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\TfidfLogRegBaseline\\20261120_113206\\baseline_results.csv",
+  "per_repo_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\TfidfLogRegBaseline\\20261120_113206\\baseline_per_repo.csv"
+}

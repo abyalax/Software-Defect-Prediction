@@ -1,4 +1,4 @@
-"""Run the TF-IDF + Logistic Regression baseline on a Defectors split scenario."""
+"""Run a baseline (TF-IDF + Logistic Regression, or diff-size only) on a Defectors split scenario."""
 
 from __future__ import annotations
 
@@ -10,26 +10,33 @@ from typing import TYPE_CHECKING
 import pandas as pd
 
 from software_defects.data.defectors.evaluation import DefectEvaluator
-from software_defects.data.defectors.split_generator import SplitScenario
+from software_defects.data.defectors.split_generator import (
+    GROUP_KFOLD_N_FOLDS,
+    GROUP_KFOLD_SCENARIOS,
+    DefectorsSplitGenerator,
+    SplitScenario,
+)
+from software_defects.models.length_logreg import LengthLogRegBaseline
 from software_defects.models.tfidf_logreg import BaselineConfig, TfidfLogRegBaseline
 from software_defects.reporting.reporter import ReportWritter
 
 if TYPE_CHECKING:
     from software_defects.config import DatasetConfig
 
-GROUP_KFOLD_SCENARIOS = {SplitScenario.GROUP_KFOLD_ML_DL, SplitScenario.GROUP_KFOLD_NON_ML}
-GROUP_KFOLD_N_FOLDS = 5
+BASELINE_MODELS = {"tfidf": TfidfLogRegBaseline, "length": LengthLogRegBaseline}
+REPORT_CLASS_NAMES = {"tfidf": "TfidfLogRegBaseline", "length": "LengthLogRegBaseline"}
 METRIC_COLUMNS = ["pr_auc", "f1", "mcc", "roc_auc", "train_seconds", "inference_seconds"]
 
 
 class BaselineExperiment:
-    """Train and evaluate the baseline for one split scenario over several seeds."""
+    """Train and evaluate a baseline for one split scenario over several seeds."""
 
     def __init__(
         self,
         config: DatasetConfig,
         input_dir: Path,
         baseline_config: BaselineConfig | None = None,
+        model_name: str = "tfidf",
     ) -> None:
         """Initialize the experiment.
 
@@ -37,16 +44,23 @@ class BaselineExperiment:
             config: Dataset configuration.
             input_dir: Directory containing processed parquet files from pipeline.
             baseline_config: Baseline hyperparameters.
+            model_name: ``tfidf`` (TF-IDF + Logistic Regression) or ``length`` (diff-size features only).
+
+        Raises:
+            ValueError: If ``model_name`` is not a known baseline.
         """
+        if model_name not in BASELINE_MODELS:
+            raise ValueError(f"Unknown baseline model '{model_name}'; expected one of {sorted(BASELINE_MODELS)}")
         self._config = config
         self._input_dir = Path(input_dir)
         self._baseline_config = baseline_config or BaselineConfig()
+        self._model_name = model_name
         self._evaluator = DefectEvaluator()
         self._reporter = ReportWritter(
             config=config,
             domain_data="defectors",
             pipeline="baseline",
-            class_name="TfidfLogRegBaseline",
+            class_name=REPORT_CLASS_NAMES[model_name],
         )
 
     def run(
@@ -54,6 +68,8 @@ class BaselineExperiment:
         scenario: SplitScenario,
         seeds: list[int],
         equalize_train_size: int | None = None,
+        exclude_repos: list[str] | None = None,
+        fold: int | None = None,
     ) -> pd.DataFrame:
         """Run the baseline and save per-run and per-repository results.
 
@@ -61,20 +77,40 @@ class BaselineExperiment:
             scenario: Split scenario to evaluate.
             seeds: Random seeds; each seed gives one run (per fold for Group K-Fold).
             equalize_train_size: If set, subsample the training set to this size.
+            exclude_repos: List of repository names to exclude from the analysis.
+            fold: Specific fold to run (for Group K-Fold scenarios). If None, runs all folds.
 
         Returns:
             DataFrame with one row per (fold, seed) run.
         """
-        self._reporter.display_section(f"TF-IDF + Logistic Regression Baseline ({scenario.value})")
+        self._reporter.display_section(f"{REPORT_CLASS_NAMES[self._model_name]} ({scenario.value})")
 
-        # Load processed data from pipeline output
-        train_df, val_df, test_df = self._load_processed_data(scenario)
+        if exclude_repos:
+            self._reporter.display_text(f"Excluding repositories: {', '.join(exclude_repos)}")
 
-        folds = list(range(GROUP_KFOLD_N_FOLDS)) if scenario in GROUP_KFOLD_SCENARIOS else [0]
+        # Handle fold selection
+        if scenario in GROUP_KFOLD_SCENARIOS:
+            folds = [fold] if fold is not None else list(range(GROUP_KFOLD_N_FOLDS))
+        else:
+            if fold is not None:
+                raise ValueError("--fold is only valid for the Group_KFold scenarios")
+            folds = [0]
 
         run_rows: list[dict] = []
         repo_rows: list[dict] = []
         for fold in folds:
+            # Each Group K-Fold fold has its own processed split (the pipeline writes one per fold)
+            train_df, val_df, test_df = self._load_processed_data(scenario, fold)
+
+            # Filter out excluded repositories
+            if exclude_repos:
+                train_df = train_df[~train_df["repo"].isin(exclude_repos)].copy()
+                val_df = val_df[~val_df["repo"].isin(exclude_repos)].copy()
+                test_df = test_df[~test_df["repo"].isin(exclude_repos)].copy()
+                self._reporter.display_text(
+                    f"After exclusion: Train={len(train_df):,} Val={len(val_df):,} Test={len(test_df):,}"
+                )
+
             for seed in seeds:
                 run_row, repo_frame = self._run_once(
                     train_df, val_df, test_df, scenario, seed, fold, equalize_train_size
@@ -100,8 +136,10 @@ class BaselineExperiment:
         self._reporter.update_summary(
             {
                 "scenario": scenario.value,
+                "model": self._model_name,
                 "seeds": seeds,
                 "equalize_train_size": equalize_train_size,
+                "exclude_repos": exclude_repos,
                 "n_runs": len(results),
                 "mean": summary.loc["mean"].to_dict(),
                 "std": summary.loc["std"].fillna(0.0).to_dict(),
@@ -115,11 +153,14 @@ class BaselineExperiment:
         )
         return results
 
-    def _load_processed_data(self, scenario: SplitScenario) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def _load_processed_data(
+        self, scenario: SplitScenario, fold: int = 0
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """Load processed parquet files from pipeline output.
 
         Args:
             scenario: Split scenario to load.
+            fold: Fold index, only used by the Group K-Fold scenarios.
 
         Returns:
             Tuple of (train_df, val_df, test_df).
@@ -127,7 +168,8 @@ class BaselineExperiment:
         Raises:
             FileNotFoundError: If processed parquet files don't exist.
         """
-        scenario_dir = self._input_dir / scenario.value
+        scenario_dir = DefectorsSplitGenerator.scenario_dir(self._input_dir, scenario, fold)
+        fold_hint = f" --fold {fold}" if scenario in GROUP_KFOLD_SCENARIOS else ""
         train_path = scenario_dir / f"{scenario.value}_train.parquet"
         val_path = scenario_dir / f"{scenario.value}_val.parquet"
         test_path = scenario_dir / f"{scenario.value}_test.parquet"
@@ -136,19 +178,22 @@ class BaselineExperiment:
             raise FileNotFoundError(
                 f"Processed train file not found: {train_path}\n"
                 f"Please run the data pipeline first: uv run python -m software_defects run-pipeline "
-                f"--dataset {self._config.dataset_name} --scenario {scenario.value} --output-dir {self._input_dir}"
+                f"--dataset {self._config.dataset_name} --scenario {scenario.value}"
+                f"{fold_hint}"
             )
         if not val_path.exists():
             raise FileNotFoundError(
                 f"Processed val file not found: {val_path}\n"
                 f"Please run the data pipeline first: uv run python -m software_defects run-pipeline "
-                f"--dataset {self._config.dataset_name} --scenario {scenario.value} --output-dir {self._input_dir}"
+                f"--dataset {self._config.dataset_name} --scenario {scenario.value}"
+                f"{fold_hint}"
             )
         if not test_path.exists():
             raise FileNotFoundError(
                 f"Processed test file not found: {test_path}\n"
                 f"Please run the data pipeline first: uv run python -m software_defects run-pipeline "
-                f"--dataset {self._config.dataset_name} --scenario {scenario.value} --output-dir {self._input_dir}"
+                f"--dataset {self._config.dataset_name} --scenario {scenario.value}"
+                f"{fold_hint}"
             )
 
         train_df = pd.read_parquet(train_path)
@@ -178,7 +223,7 @@ class BaselineExperiment:
         if equalize_train_size is not None and len(train_df) > equalize_train_size:
             train_df = train_df.sample(n=equalize_train_size, random_state=seed)
 
-        model = TfidfLogRegBaseline(self._baseline_config, seed=seed)
+        model = BASELINE_MODELS[self._model_name](self._baseline_config, seed=seed)
         model.fit(
             train_df["content"],
             train_df["label"].to_numpy(),
@@ -224,6 +269,7 @@ class BaselineExperiment:
 
         run_row = {
             "scenario": scenario.value,
+            "model": self._model_name,
             "fold": fold,
             "seed": seed,
             "n_train": len(train_df),

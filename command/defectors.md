@@ -64,6 +64,16 @@ Keys must match the `repo` column exactly (case-sensitive, e.g. `spaCy`, `core`)
 Repositories under `ambiguous_repositories` and `unmapped_repositories` are excluded from all
 ML vs non-ML experiments.
 
+The same file holds the test holdout in `holdout_repositories` (`ml_dl` and `non_ml` lists). It is the only place
+that decides which repositories are tested in `Repository_Level_Split`, `Within_Domain_ML_DL` and
+`Within_Domain_Non_ML`, and it is reported by checkpoints 8 and 11. Current holdout:
+
+- ML/DL: `jax`, `lightning` (about 30% of the ML/DL rows)
+- Non-ML: `airflow`, `ansible`, `black`, `celery` (about 33% of the Non-ML rows)
+
+Every holdout repository must be mapped to its own domain, and a domain can never be held out completely
+(otherwise loading fails with a clear error).
+
 ### 5. Tokenizer Configuration (Optional)
 
 The data pipeline uses multiple tokenizers by default for model comparison:
@@ -127,18 +137,18 @@ The exploratory performs the following checkpoints:
     - P99: 14,951 chars
 
 - **Checkpoint 4: Repository and Domain Validity**
-  - 25 repositories total
+  - 26 repositories total (7 ML/DL, 19 Non-ML)
   - Top repositories: ansible (39,060), sentry (33,506), core (33,292)
   - 81,778 unique commits
   - Mean files per commit: 2.37
 
 - **Checkpoint 5: Leakage and Unit Analysis**
   - No duplicate (repo+commit+filepath) records
-  - Repository overlap: 24 out of 25 repositories overlap between train and test
+  - Repository overlap: 25 out of 26 repositories overlap between train and test
   - WARNING: Current splits have repository overlap - need repository-level split for valid evaluation
 
 - **Checkpoint 6: Cross-domain Feasibility**
-  - ML/DL repositories: 6 (lightning, jax, transformers, ray, scikit-learn, yolov5)
+  - ML/DL repositories: 7 (lightning, jax, transformers, ray, scikit-learn, yolov5, spaCy)
   - Non-ML repositories: 19
   - Label distribution by domain (train):
     - ML/DL: 48.70% defective
@@ -154,12 +164,11 @@ The exploratory performs the following checkpoints:
 - **Checkpoint 8: Split Strategy Evaluation**
   - Current split analysis (random vs repository-level)
   - Data leakage identification from repository overlap
-  - Recommended split strategies:
-    - Balanced Repository-Level Split: holdout 2 ML/DL repos and 4 Non-ML repos for test
-    - Within-Domain Splits: holdout repos within the same domain
-    - Cross-Domain Splits: train on one domain, test on the other
-  - Projected sample distributions for each recommended strategy
-  - JSON output with split_recommendations.json
+  - Configured repository-level holdout, read from `holdout_repositories` in the mapping YAML
+    (2 ML/DL repos and 4 Non-ML repos for test)
+  - Projected sample distribution over train + val + test, after the same filtering as the pipeline
+    (freqtrade and empty-content rows removed)
+  - JSON output with split_recommendations.json (`configured_repository_level_split`)
 
 - **Checkpoint 9: Label Distribution Analysis**
   - Global label distribution statistics
@@ -174,12 +183,12 @@ The exploratory performs the following checkpoints:
   - CSV output with repository_mapping.csv
 
 - **Checkpoint 11: Repository-Level Split Analysis**
-  - Simulation of different split scenarios
+  - Runs the real `DefectorsSplitGenerator`, so the numbers equal what the pipeline trains on
   - ML to Non-ML cross-domain split
   - Non-ML to ML cross-domain split
-  - Repository-level split with holdout
+  - Repository-level split with the configured holdout
   - Within-domain splits for ML/DL and Non-ML
-  - CSV output with split_report.csv
+  - CSV output with split_report.csv (train, val and test samples per scenario)
 
 - **Checkpoint 12: Token Distribution Analysis**
   - Token length statistics (mean, median, percentiles) for multiple models
@@ -263,6 +272,7 @@ uv run python -m software_defects run-pipeline --dataset defectors --scenario <S
 - `--output-dir` : Directory to save processed data. If not specified, data is not saved.
 - `--commit-level` : Aggregate data to commit-level instead of file-level.
 - `--no-tokenize` : Skip tokenization step.
+- `--fold` : Fold index (0-4), only for the Group K-Fold scenarios. If omitted, all 5 folds are generated.
 
 ### Pipeline Features
 
@@ -305,12 +315,17 @@ uv run python -m software_defects run-pipeline --dataset defectors --scenario Wi
 uv run python -m software_defects run-pipeline --dataset defectors --scenario Within_Domain_Non_ML
 ```
 ### Group K-Fold ML/DL (Within-domain)
+Generates all 5 folds, one processed directory per fold (`.../Group_KFold_ML_DL/fold_0` to `fold_4`):
 ```Shell
 uv run python -m software_defects run-pipeline --dataset defectors --scenario Group_KFold_ML_DL
 ```
 ### Group K-Fold Non-ML (Within-domain)
 ```Shell
 uv run python -m software_defects run-pipeline --dataset defectors --scenario Group_KFold_Non_ML
+```
+### A single fold only
+```Shell
+uv run python -m software_defects run-pipeline --dataset defectors --scenario Group_KFold_ML_DL --fold 2
 ```
 
 ## Pipeline Output Format
@@ -331,6 +346,8 @@ When `--output-dir` is specified with tokenization enabled:
     ├── {scenario}_val.parquet
     └── {scenario}_test.parquet
 ```
+
+For `Group_KFold_ML_DL` and `Group_KFold_Non_ML` the same layout is repeated inside `{output_dir}/{scenario}/fold_{n}/`.
 
 **Note**: The raw parquet files (at the root of the scenario directory) are used by the baseline experiment (TF-IDF + Logistic Regression). The model-specific subdirectories (codebert/ and codet5/) contain tokenized data for deep learning models.
 
@@ -360,34 +377,34 @@ The pipeline saves the following artifacts under `artifacts/report/defectors/dat
 ### Split Scenarios
 
 #### ML_to_NonML
-- **Train**: All ML/DL repositories (6 repos)
-- **Test**: All Non-ML repositories (18 repos)
+- **Train**: All ML/DL repositories (7 repos)
+- **Test**: All Non-ML repositories (19 repos)
 - **Use case**: Cross-domain evaluation from ML/DL to general software
 
 #### NonML_to_ML
-- **Train**: All Non-ML repositories (18 repos)
-- **Test**: All ML/DL repositories (6 repos)
+- **Train**: All Non-ML repositories (19 repos)
+- **Test**: All ML/DL repositories (7 repos)
 - **Use case**: Cross-domain evaluation from general software to ML/DL
 
 #### Repository_Level_Split
 - **Train**: Mixed domains with repository holdout
-- **Test**: Holdout repositories (1 ML/DL + 3 Non-ML)
+- **Test**: Holdout repositories from the mapping YAML (2 ML/DL + 4 Non-ML)
 - **Use case**: Balanced repository-level evaluation with no overlap
 
 #### Within_Domain_ML_DL
 - **Train**: ML/DL repositories excluding holdout
-- **Test**: Holdout ML/DL repositories (1-2 repos)
+- **Test**: Holdout ML/DL repositories from the mapping YAML (`jax`, `lightning`)
 - **Use case**: Within-domain ML/DL evaluation
 
 #### Within_Domain_Non_ML
 - **Train**: Non-ML repositories excluding holdout
-- **Test**: Holdout Non-ML repositories (3-4 repos)
+- **Test**: Holdout Non-ML repositories from the mapping YAML (`airflow`, `ansible`, `black`, `celery`)
 - **Use case**: Within-domain Non-ML evaluation
 
 ### Tokenization Notes
 
 - **Supported models**: CodeBERT (microsoft/codebert-base) and CodeT5-small (Salesforce/codet5-small)
-- **Default max_length**: 1024
+- **Default max_length**: 512 (the CodeBERT limit; the same length is used for CodeT5-small so the comparison is fair)
 - **Model-specific tokenization**: Each model uses its own tokenizer for proper comparison
 - **Output**: Tokenized data saved in model-specific subdirectories (codebert/ and codet5/)
 - **Truncation**: Enabled by default for sequences exceeding max_length
@@ -406,9 +423,11 @@ The pipeline saves the following artifacts under `artifacts/report/defectors/dat
 
 ## Baseline Commands
 
-### 3. Run TF-IDF + Logistic Regression Baseline
+### 3. Run Baselines (TF-IDF + Logistic Regression, diff-size only)
 
-Run the baseline experiment on processed data from the pipeline:
+Run a baseline experiment on processed data from the pipeline. `--model tfidf` (default) is TF-IDF + Logistic Regression.
+`--model length` uses only four diff-size features (diff length, added lines, removed lines, hunks) and is the
+reference for shortcut signals: a model that reads code should beat it clearly.
 
 ```Shell
 uv run python -m software_defects run-baseline --dataset defectors --scenario <SCENARIO> [OPTIONS]
@@ -422,8 +441,6 @@ uv run python -m software_defects run-baseline --dataset defectors --scenario <S
   - `Repository_Level_Split` - Repository-level holdout (mixed domains)
   - `Within_Domain_ML_DL` - Within-domain ML/DL holdout
   - `Within_Domain_Non_ML` - Within-domain Non-ML holdout
-  - `Leave_Repo_Out_ML_DL` - Leave-one-repo-out for ML/DL
-  - `Leave_Repo_Out_Non_ML` - Leave-one-repo-out for Non-ML
   - `Group_KFold_ML_DL` - Group K-Fold for ML/DL (5 folds)
   - `Group_KFold_Non_ML` - Group K-Fold for Non-ML (5 folds)
   - `Cross_Domain_Default` - Cross-domain with default settings
@@ -431,8 +448,10 @@ uv run python -m software_defects run-baseline --dataset defectors --scenario <S
 **Optional arguments**:
 - `--project-root` : Project root that contains `data/raw/`. Defaults to the current working directory.
 - `--input-dir` : Directory containing processed parquet files from pipeline. If not specified, defaults to `data/processed/defectors`.
+- `--model` : `tfidf` (default) or `length` (diff-size features only).
 - `--seeds` : Comma-separated random seeds for multiple runs (default: `42`). Example: `42,43,44`.
 - `--equalize-train-size` : Subsample the training set to this many rows for size comparisons.
+- `--exclude-repos` : Comma-separated list of repositories to exclude from the analysis (e.g., `openpilot`). Useful for sensitivity analysis.
 
 ### Prerequisites
 
@@ -483,7 +502,7 @@ The baseline experiment performs the following:
 
 ### Baseline Artifacts
 
-The baseline saves the following artifacts under `artifacts/report/defectors/baseline/TfidfLogRegBaseline/<timestamp>/`:
+The baseline saves the following artifacts under `artifacts/report/defectors/baseline/<TfidfLogRegBaseline|LengthLogRegBaseline>/<timestamp>/`:
 - `baseline_<scenario>.txt` - Text report with per-run statistics
 - `baseline_<scenario>.json` - JSON summary with structured data
 - `baseline_results.csv` - Per-run results with metrics (PR-AUC, F1, MCC, ROC-AUC, train time, inference time)
@@ -494,6 +513,7 @@ The baseline saves the following artifacts under `artifacts/report/defectors/bas
 #### baseline_results.csv
 Columns:
 - `scenario` - Split scenario name
+- `model` - Baseline model (`tfidf` or `length`)
 - `fold` - Fold number (0 for non-KFold scenarios, 0-4 for Group K-Fold)
 - `seed` - Random seed used
 - `n_train` - Number of training samples
@@ -531,7 +551,8 @@ Columns:
 
 For `Group_KFold_ML_DL` and `Group_KFold_Non_ML` scenarios:
 - The experiment runs 5 folds (repository-based cross-validation)
-- Each fold uses a different repository as the test set
+- Each fold reads its own processed split (`.../{scenario}/fold_{n}/`), so run the pipeline for all 5 folds first
+- Each fold tests different repositories; every repository is tested in exactly one fold
 - Results are aggregated across all folds for mean and standard deviation
 
 ### Error Handling

@@ -1,0 +1,78 @@
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Defectors Dataset Exploratory
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Running checkpoints: [8, 11, 12, 14]
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Checkpoint 8: Split Strategy Evaluation
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Current Split Analysis:
+  Train repos: 24 total (7 ML/DL, 17 Non-ML)
+  Test repos: 24 total (7 ML/DL, 17 Non-ML)
+  Repository overlap: 24 repos
+
+  INFO: Current split is random record-level (not repository-level)
+  INFO: Repository-level split will be used in pipeline to avoid data leakage
+
+Configured Repository-Level Holdout (artifacts/mapping/repository_mapping.yaml)
+  Test ML/DL repos: ['jax', 'lightning']
+  Test Non-ML repos: ['airflow', 'ansible', 'black', 'celery']
+  Train ML/DL repos: ['ray', 'scikit-learn', 'spaCy', 'transformers', 'yolov5']
+  Train Non-ML repos: ['core', 'cpython', 'django', 'django-rest-framework', 'localstack', 'numpy', 'openpilot', 'pandas', 'pipenv', 'poetry', 'redash', 'scrapy', 'sentry']
+
+Projected Sample Distribution (train + val + test, after filtering):
+  Train ML/DL: 27,873
+  Test ML/DL: 11,740
+  Train Non-ML: 114,988
+  Test Non-ML: 55,555
+
+  Split recommendations saved to: C:\Users\abya\python\software-defect\artifacts\report\defectors\dataset_exploratory\DefectorsDatasetExplorer\20261120_062125\split_recommendations.json
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Checkpoint 11: Repository-Level Split Analysis
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  ML_to_NonML: train 35,573 / val 4,040 / test 170,543 (test repos: airflow, ansible, black, celery, core, cpython, django, django-rest-framework, localstack, numpy, openpilot, pandas, pipenv, poetry, redash, scrapy, sentry)
+  NonML_to_ML: train 152,465 / val 18,078 / test 39,613 (test repos: jax, lightning, ray, scikit-learn, spaCy, transformers, yolov5)
+  Repository_Level_Split: train 128,791 / val 14,070 / test 67,295 (test repos: jax, lightning, airflow, ansible, black, celery)
+  Within_Domain_ML_DL: train 24,766 / val 3,107 / test 11,740 (test repos: jax, lightning)
+  Within_Domain_Non_ML: train 103,008 / val 11,980 / test 55,555 (test repos: airflow, ansible, black, celery)
+
+Split report saved to: C:\Users\abya\python\software-defect\artifacts\report\defectors\dataset_exploratory\DefectorsDatasetExplorer\20261120_062125\split_report.csv
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Checkpoint 12: Token Distribution Analysis
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CodeBERT (microsoft/codebert-base):
+  Mean tokens: 847.07
+  Median tokens: 343.00
+  P95 tokens: 2869.00
+  P99 tokens: 6891.00
+  Overflow (>512): 78,075 (36.58%)
+
+CodeT5-small (Salesforce/codet5-small):
+  Mean tokens: 576.59
+  Median tokens: 241.00
+  P95 tokens: 1861.00
+  P99 tokens: 4422.00
+  Overflow (>512): 54,496 (25.53%)
+
+Token analysis saved to: C:\Users\abya\python\software-defect\artifacts\report\defectors\dataset_exploratory\DefectorsDatasetExplorer\20261120_062125\token_analysis.csv
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Checkpoint 14: Run Report
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Total warnings collected: 0
+
+Combined run report saved to: C:\Users\abya\python\software-defect\artifacts\report\defectors\dataset_exploratory\DefectorsDatasetExplorer\20261120_062125\combined_run_report.json
+
+Markdown report saved to: C:\Users\abya\python\software-defect\artifacts\report\defectors\dataset_exploratory\DefectorsDatasetExplorer\20261120_062125\combined_run_report.md

@@ -113,3 +113,21 @@ unmapped_repositories:
     domain: unmapped
     criteria: "Cryptocurrency trading bot - only 1 record, unclear domain"
     confidence: unknown
+
+# Explicit test holdout used by Repository_Level_Split, Within_Domain_ML_DL and Within_Domain_Non_ML
+# (and reported by inspect-data checkpoints 8 and 11). This is the single source of truth: change it
+# here only. Every repository must also appear in the matching *_repositories section above, and a
+# domain can never be held out completely.
+# Chosen so each domain keeps about 30% of its rows in test and the test set mixes a large and a small
+# repository (alphabetical slicing used previously left only jax, 726 rows, as the ML/DL test set):
+#   ml_dl:  jax + lightning                  -> 11,888 rows (29.7%), 48.9% defective
+#   non_ml: airflow + ansible + black + celery -> 57,554 rows (33.2%), 36.6% defective
+holdout_repositories:
+  ml_dl:
+    - jax
+    - lightning
+  non_ml:
+    - airflow
+    - ansible
+    - black
+    - celery

@@ -1,0 +1,18 @@
+
+--------------------------------------------------------------------------------
+TfidfLogRegBaseline (Group_KFold_ML_DL)
+--------------------------------------------------------------------------------
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Group_KFold_ML_DL\fold_0
+  Train: 19,839 samples
+  Val: 2,283 samples
+  Test: 17,491 samples
+
+  fold=0 seed=42: PR-AUC=0.4693 F1=0.5951 MCC=0.0322 ROC-AUC=0.5539 (train 6.6s, inference 2.4s)
+
+Mean and standard deviation over runs:
+┌──────┬────────┬────────┬────────┬─────────┬───────────────┬───────────────────┐
+│      │ pr_auc │ f1     │ mcc    │ roc_auc │ train_seconds │ inference_seconds │
+├──────┼────────┼────────┼────────┼─────────┼───────────────┼───────────────────┤
+│ mean │ 0.4693 │ 0.5951 │ 0.0322 │ 0.5539  │ 6.6341        │ 2.3658            │
+│ std  │ nan    │ nan    │ nan    │ nan     │ nan           │ nan               │
+└──────┴────────┴────────┴────────┴─────────┴───────────────┴───────────────────┘

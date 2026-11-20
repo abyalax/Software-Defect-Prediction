@@ -1,0 +1,105 @@
+{
+  "current_split": {
+    "train_ml_dl_repos": [
+      "jax",
+      "lightning",
+      "ray",
+      "scikit-learn",
+      "spaCy",
+      "transformers",
+      "yolov5"
+    ],
+    "train_non_ml_repos": [
+      "airflow",
+      "ansible",
+      "black",
+      "celery",
+      "core",
+      "cpython",
+      "django",
+      "django-rest-framework",
+      "localstack",
+      "numpy",
+      "openpilot",
+      "pandas",
+      "pipenv",
+      "poetry",
+      "redash",
+      "scrapy",
+      "sentry"
+    ],
+    "test_ml_dl_repos": [
+      "jax",
+      "lightning",
+      "ray",
+      "scikit-learn",
+      "spaCy",
+      "transformers",
+      "yolov5"
+    ],
+    "test_non_ml_repos": [
+      "airflow",
+      "ansible",
+      "black",
+      "celery",
+      "core",
+      "cpython",
+      "django",
+      "django-rest-framework",
+      "localstack",
+      "numpy",
+      "openpilot",
+      "pandas",
+      "pipenv",
+      "poetry",
+      "redash",
+      "scrapy",
+      "sentry"
+    ],
+    "is_repository_level": false,
+    "repo_overlap_count": 24
+  },
+  "configured_repository_level_split": {
+    "train_ml_dl_repos": [
+      "ray",
+      "scikit-learn",
+      "spaCy",
+      "transformers",
+      "yolov5"
+    ],
+    "test_ml_dl_repos": [
+      "jax",
+      "lightning"
+    ],
+    "train_non_ml_repos": [
+      "core",
+      "cpython",
+      "django",
+      "django-rest-framework",
+      "localstack",
+      "numpy",
+      "openpilot",
+      "pandas",
+      "pipenv",
+      "poetry",
+      "redash",
+      "scrapy",
+      "sentry"
+    ],
+    "test_non_ml_repos": [
+      "airflow",
+      "ansible",
+      "black",
+      "celery"
+    ],
+    "projected_train_ml_dl_samples": 27873,
+    "projected_test_ml_dl_samples": 11740,
+    "projected_train_non_ml_samples": 114988,
+    "projected_test_non_ml_samples": 55555
+  },
+  "issues_identified": [
+    "Current split is random record-level, not repository-level",
+    "All repositories overlap between train and test",
+    "Pipeline will use the repository-level holdout configured in the mapping YAML"
+  ]
+}

@@ -46,11 +46,16 @@ class RunnerCLI:
         output_dir: Path | None,
         commit_level: bool,
         tokenize: bool,
+        fold: int | None = None,
     ) -> int:
         """Execute the data processing pipeline."""
         from software_defects.config import DatasetConfig
         from software_defects.data.defectors.pipeline import DefectorsDataPipeline
-        from software_defects.data.defectors.split_generator import SplitScenario
+        from software_defects.data.defectors.split_generator import (
+            GROUP_KFOLD_N_FOLDS,
+            GROUP_KFOLD_SCENARIOS,
+            SplitScenario,
+        )
 
         dataset_config = DatasetConfig(
             project_root=project_root,
@@ -75,14 +80,24 @@ class RunnerCLI:
         if scenario_enum is None:
             raise ValueError(f"Unknown scenario: {scenario}")
 
-        # Run the pipeline
-        pipeline = DefectorsDataPipeline(config=dataset_config)
-        pipeline.run_pipeline(
-            scenario=scenario_enum,
-            output_dir=output_dir,
-            commit_level=commit_level,
-            tokenize=tokenize,
-        )
+        # Group K-Fold writes one processed directory per fold; other scenarios have a single split
+        if scenario_enum in GROUP_KFOLD_SCENARIOS:
+            folds = [fold] if fold is not None else list(range(GROUP_KFOLD_N_FOLDS))
+        elif fold is not None:
+            raise ValueError("--fold is only valid for the Group_KFold scenarios")
+        else:
+            folds = [0]
+
+        for fold_index in folds:
+            # A fresh pipeline per fold keeps each fold's report separate
+            pipeline = DefectorsDataPipeline(config=dataset_config)
+            pipeline.run_pipeline(
+                scenario=scenario_enum,
+                output_dir=output_dir,
+                commit_level=commit_level,
+                tokenize=tokenize,
+                fold=fold_index,
+            )
         return 0
 
     @staticmethod
@@ -93,8 +108,11 @@ class RunnerCLI:
         input_dir: Path | None,
         seeds: list[int],
         equalize_train_size: int | None,
+        model: str = "tfidf",
+        exclude_repos: str | None = None,
+        fold: int | None = None,
     ) -> int:
-        """Execute the TF-IDF + Logistic Regression baseline."""
+        """Execute a baseline (TF-IDF + Logistic Regression, or diff-size features only)."""
         from software_defects.config import DatasetConfig
         from software_defects.data.defectors.split_generator import SplitScenario
         from software_defects.models.baseline_experiment import BaselineExperiment
@@ -108,10 +126,17 @@ class RunnerCLI:
         if input_dir is None:
             input_dir = dataset_config.processed_dir
 
-        experiment = BaselineExperiment(config=dataset_config, input_dir=input_dir)
+        # Parse exclude_repos if provided
+        exclude_repos_list = None
+        if exclude_repos is not None:
+            exclude_repos_list = [repo.strip() for repo in exclude_repos.split(",")]
+
+        experiment = BaselineExperiment(config=dataset_config, input_dir=input_dir, model_name=model)
         experiment.run(
             scenario=SplitScenario(scenario),
             seeds=seeds,
             equalize_train_size=equalize_train_size,
+            exclude_repos=exclude_repos_list,
+            fold=fold,
         )
         return 0

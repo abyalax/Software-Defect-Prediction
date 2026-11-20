@@ -1,0 +1,20 @@
+
+----------------------------------------------------------------------------------------------------------------
+TfidfLogRegBaseline (Repository_Level_Split)
+----------------------------------------------------------------------------------------------------------------
+Loaded processed data from: C:\Users\abya\python\software-defect\data\processed\defectors\Repository_Level_Split
+  Train: 128,791 samples
+  Val: 14,070 samples
+  Test: 67,295 samples
+
+  fold=0 seed=42: PR-AUC=0.4745 F1=0.5146 MCC=0.1060 ROC-AUC=0.5795 (train 118.8s, inference 24.4s)
+  fold=0 seed=43: PR-AUC=0.4745 F1=0.5146 MCC=0.1060 ROC-AUC=0.5795 (train 71.2s, inference 11.2s)
+  fold=0 seed=44: PR-AUC=0.4745 F1=0.5146 MCC=0.1060 ROC-AUC=0.5795 (train 61.2s, inference 11.0s)
+
+Mean and standard deviation over runs:
+┌──────┬────────┬────────┬───────┬─────────┬───────────────┬───────────────────┐
+│      │ pr_auc │ f1     │ mcc   │ roc_auc │ train_seconds │ inference_seconds │
+├──────┼────────┼────────┼───────┼─────────┼───────────────┼───────────────────┤
+│ mean │ 0.4745 │ 0.5146 │ 0.106 │ 0.5795  │ 83.7302       │ 15.5595           │
+│ std  │ 0.0    │ 0.0    │ 0.0   │ 0.0     │ 30.7455       │ 7.699             │
+└──────┴────────┴────────┴───────┴─────────┴───────────────┴───────────────────┘

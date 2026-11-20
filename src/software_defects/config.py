@@ -14,7 +14,8 @@ class DatasetConfig:
     dataset_name: str
     row_limit: int | None = None
     dtype: dict[str, str] | None = None
-    tokenizer_max_length: int = 1024
+    # CodeBERT (RoBERTa) has 512 position embeddings, so 512 is the largest length both models can share
+    tokenizer_max_length: int = 512
     tokenizer_models: dict[str, str] = field(
         default_factory=lambda: {
             "codebert": "microsoft/codebert-base",

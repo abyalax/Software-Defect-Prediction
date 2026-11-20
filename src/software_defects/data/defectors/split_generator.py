@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from software_defects.data.defectors.domain_mapping import load_domain_sets
+from software_defects.data.defectors.domain_mapping import load_domain_sets, load_holdout_repos
 
 if TYPE_CHECKING:
     from software_defects.config import DatasetConfig
@@ -27,6 +28,10 @@ class SplitScenario(Enum):
     GROUP_KFOLD_ML_DL = "Group_KFold_ML_DL"
     GROUP_KFOLD_NON_ML = "Group_KFold_Non_ML"
     CROSS_DOMAIN_DEFAULT = "Cross_Domain_Default"
+
+
+GROUP_KFOLD_SCENARIOS = frozenset({SplitScenario.GROUP_KFOLD_ML_DL, SplitScenario.GROUP_KFOLD_NON_ML})
+GROUP_KFOLD_N_FOLDS = 5
 
 
 @dataclass
@@ -65,7 +70,53 @@ class DefectorsSplitGenerator:
         self._ml_dl_repos = domain_sets["ml_dl"]
         self._non_ml_repos = domain_sets["non_ml"]
 
-    def _filter_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Test holdout is explicit in the same YAML (never derived from alphabetical order)
+        self._holdout = load_holdout_repos(config.project_root)
+
+    @staticmethod
+    def scenario_dir(base_dir: Path, scenario: SplitScenario, fold: int = 0) -> Path:
+        """Return the directory that holds the processed files of one scenario.
+
+        Group K-Fold scenarios store each fold in its own ``fold_<n>`` subdirectory so that folds
+        never overwrite each other.
+
+        Args:
+            base_dir: Root directory of the processed data.
+            scenario: Split scenario.
+            fold: Fold index, only used by the Group K-Fold scenarios.
+
+        Returns:
+            Directory of the scenario (and fold).
+        """
+        scenario_path = Path(base_dir) / scenario.value
+        if scenario in GROUP_KFOLD_SCENARIOS:
+            return scenario_path / f"fold_{fold}"
+        return scenario_path
+
+    def _holdout_split(self, domain: str, available_repos: list[str]) -> tuple[list[str], list[str]]:
+        """Split the repositories of one domain into train and test using the configured holdout.
+
+        Args:
+            domain: ``ml_dl`` or ``non_ml``.
+            available_repos: Sorted repositories of that domain present in the data.
+
+        Returns:
+            Tuple of (train_repos, test_repos).
+
+        Raises:
+            ValueError: If no holdout repository is present in the data, or no training repository remains.
+        """
+        holdout = set(self._holdout[domain])
+        test_repos = [repo for repo in available_repos if repo in holdout]
+        train_repos = [repo for repo in available_repos if repo not in holdout]
+        if not test_repos or not train_repos:
+            raise ValueError(
+                f"Holdout for domain '{domain}' leaves an empty side "
+                f"(train={train_repos}, test={test_repos}); check holdout_repositories in the mapping YAML"
+            )
+        return train_repos, test_repos
+
+    def filter_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Filter data to exclude freqtrade and apply basic cleaning.
 
         Args:
@@ -107,7 +158,7 @@ class DefectorsSplitGenerator:
         Returns:
             SplitResult with train/val/test DataFrames and metadata.
         """
-        df = self._filter_data(df)
+        df = self.filter_data(df)
 
         if scenario == SplitScenario.ML_TO_NON_ML:
             return self._split_ml_to_non_ml(df, val_ratio, equalize_train_size, seed)
@@ -214,20 +265,9 @@ class DefectorsSplitGenerator:
         ml_dl_repo_list = [r for r in all_repos if r in self._ml_dl_repos]
         non_ml_repo_list = [r for r in all_repos if r in self._non_ml_repos]
 
-        # Holdout 1 ML/DL repo and 3 Non-ML repos for test
-        if len(ml_dl_repo_list) > 1:
-            ml_dl_test_repos = [ml_dl_repo_list[0]]
-            ml_dl_train_repos = ml_dl_repo_list[1:]
-        else:
-            ml_dl_test_repos = []
-            ml_dl_train_repos = ml_dl_repo_list
-
-        if len(non_ml_repo_list) > 3:
-            non_ml_test_repos = non_ml_repo_list[:3]
-            non_ml_train_repos = non_ml_repo_list[3:]
-        else:
-            non_ml_test_repos = non_ml_repo_list[:1] if len(non_ml_repo_list) > 0 else []
-            non_ml_train_repos = non_ml_repo_list[1:] if len(non_ml_repo_list) > 1 else []
+        # Holdout repositories come from the mapping YAML
+        ml_dl_train_repos, ml_dl_test_repos = self._holdout_split("ml_dl", ml_dl_repo_list)
+        non_ml_train_repos, non_ml_test_repos = self._holdout_split("non_ml", non_ml_repo_list)
 
         train_repos = ml_dl_train_repos + non_ml_train_repos
         test_repos = ml_dl_test_repos + non_ml_test_repos
@@ -270,12 +310,7 @@ class DefectorsSplitGenerator:
         ml_dl_df = df[df["repo"].isin(self._ml_dl_repos)].copy()
         ml_dl_repos = sorted(ml_dl_df["repo"].unique().tolist())
 
-        if len(ml_dl_repos) > 1:
-            test_repos = [ml_dl_repos[0]]
-            train_repos = ml_dl_repos[1:]
-        else:
-            test_repos = []
-            train_repos = ml_dl_repos
+        train_repos, test_repos = self._holdout_split("ml_dl", ml_dl_repos)
 
         train_df = ml_dl_df[ml_dl_df["repo"].isin(train_repos)].copy()
         test_df = ml_dl_df[ml_dl_df["repo"].isin(test_repos)].copy()
@@ -315,12 +350,7 @@ class DefectorsSplitGenerator:
         non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
         non_ml_repos = sorted(non_ml_df["repo"].unique().tolist())
 
-        if len(non_ml_repos) > 3:
-            test_repos = non_ml_repos[:3]
-            train_repos = non_ml_repos[3:]
-        else:
-            test_repos = non_ml_repos[:1] if len(non_ml_repos) > 0 else []
-            train_repos = non_ml_repos[1:] if len(non_ml_repos) > 1 else []
+        train_repos, test_repos = self._holdout_split("non_ml", non_ml_repos)
 
         train_df = non_ml_df[non_ml_df["repo"].isin(train_repos)].copy()
         test_df = non_ml_df[non_ml_df["repo"].isin(test_repos)].copy()
@@ -445,7 +475,7 @@ class DefectorsSplitGenerator:
         val_ratio: float,
         equalize_train_size: int | None,
         seed: int,
-        n_folds: int = 5,
+        n_folds: int = GROUP_KFOLD_N_FOLDS,
         fold: int = 0,
     ) -> SplitResult:
         """Split: Group K-Fold for ML/DL domain (groups by repo)."""
@@ -496,7 +526,7 @@ class DefectorsSplitGenerator:
         val_ratio: float,
         equalize_train_size: int | None,
         seed: int,
-        n_folds: int = 5,
+        n_folds: int = GROUP_KFOLD_N_FOLDS,
         fold: int = 0,
     ) -> SplitResult:
         """Split: Group K-Fold for Non-ML domain (groups by repo)."""

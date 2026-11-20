@@ -1,0 +1,75 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-pipeline --dataset defectors --scenario Group_KFold_Non_ML",
+  "total_records": 213420,
+  "train_records": 193420,
+  "test_records": 10000,
+  "val_records": 10000,
+  "scenario": "Group_KFold_Non_ML",
+  "fold": 3,
+  "train_samples": 128507,
+  "test_samples": 28124,
+  "train_defective_pct": 44.127557253690455,
+  "test_defective_pct": 43.48599061299957,
+  "train_repos": [
+    "airflow",
+    "ansible",
+    "celery",
+    "core",
+    "django",
+    "localstack",
+    "numpy",
+    "pipenv",
+    "scrapy",
+    "sentry"
+  ],
+  "test_repos": [
+    "black",
+    "cpython",
+    "django-rest-framework",
+    "openpilot",
+    "pandas",
+    "poetry",
+    "redash"
+  ],
+  "commit_level": false,
+  "tokenize": true,
+  "tokenizer_stats": {
+    "codebert": {
+      "tokenizer_model": "microsoft/codebert-base",
+      "tokenizer_max_length": 512,
+      "train_mean_tokens": 336.4349335055678,
+      "train_median_tokens": 335.0,
+      "train_truncated_pct": 0.0,
+      "test_mean_tokens": 352.601052481866,
+      "test_median_tokens": 379.5,
+      "test_truncated_pct": 0.0
+    },
+    "codet5": {
+      "tokenizer_model": "Salesforce/codet5-small",
+      "tokenizer_max_length": 512,
+      "train_mean_tokens": 282.1721696094376,
+      "train_median_tokens": 236.0,
+      "train_truncated_pct": 0.0,
+      "test_mean_tokens": 292.4163348030152,
+      "test_median_tokens": 254.0,
+      "test_truncated_pct": 0.0
+    }
+  },
+  "output_dir": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors",
+  "scenario_dir": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3",
+  "train_path": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\Group_KFold_Non_ML_train.parquet",
+  "val_path": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\Group_KFold_Non_ML_val.parquet",
+  "test_path": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\Group_KFold_Non_ML_test.parquet",
+  "model_paths": {
+    "codebert": {
+      "train": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\codebert\\Group_KFold_Non_ML_train.parquet",
+      "val": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\codebert\\Group_KFold_Non_ML_val.parquet",
+      "test": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\codebert\\Group_KFold_Non_ML_test.parquet"
+    },
+    "codet5": {
+      "train": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\codet5\\Group_KFold_Non_ML_train.parquet",
+      "val": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\codet5\\Group_KFold_Non_ML_val.parquet",
+      "test": "C:\\Users\\abya\\python\\software-defect\\data\\processed\\defectors\\Group_KFold_Non_ML\\fold_3\\codet5\\Group_KFold_Non_ML_test.parquet"
+    }
+  }
+}
