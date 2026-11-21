@@ -1,0 +1,4 @@
+key,rows,duplicate_groups,duplicate_rows,duplicate_pct,cross_repo_groups,cross_domain_groups,label_conflict_groups,largest_group
+exact_key,210156,2334,5595,2.662307999771598,2,0,773,77
+normalized_key,208822,7059,27748,13.287871967513002,162,56,1114,421
+near_key,14082,4370,14082,100.0,15,5,869,206

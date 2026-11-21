@@ -1,3 +1,0 @@
-model,tokenizer,max_sequence_length,mean_tokens,median_tokens,std_tokens,min_tokens,max_tokens,p25_tokens,p50_tokens,p75_tokens,p90_tokens,p95_tokens,p99_tokens,overflow_count,overflow_percentage
-CodeBERT,microsoft/codebert-base,512,847.0688970105895,343.0,9825.505850070764,2,4321652,184.0,343.0,779.0,1756.0,2869.0,6891.0,78075,36.582794489738546
-CodeT5-small,Salesforce/codet5-small,512,576.5877471652142,241.0,9304.51128660201,2,4114347,131.0,241.0,523.0,1159.0,1861.0,4422.0,54496,25.534626557960827

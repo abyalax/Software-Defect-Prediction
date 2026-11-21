@@ -1,0 +1,16 @@
+layout,key,test_rows,exposed_rows,exposed_pct,exposed_defective_pct
+ML_to_NonML,exact_key,170543,0,0.0,
+ML_to_NonML,normalized_key,169355,301,0.17773316406365328,50.16611295681063
+ML_to_NonML,near_key,11820,23,0.19458544839255498,0.0
+NonML_to_ML,exact_key,39613,0,0.0,
+NonML_to_ML,normalized_key,39467,495,1.2542123799630072,6.666666666666667
+NonML_to_ML,near_key,2262,10,0.4420866489832007,10.0
+Repository_Level_Split,exact_key,67295,2,0.0029719890036406862,0.0
+Repository_Level_Split,normalized_key,66578,258,0.38751539547598307,14.728682170542637
+Repository_Level_Split,near_key,4720,28,0.5932203389830508,14.285714285714285
+Within_Domain_ML_DL,exact_key,11740,0,0.0,
+Within_Domain_ML_DL,normalized_key,11691,15,0.12830382345393893,20.0
+Within_Domain_ML_DL,near_key,620,0,0.0,
+Within_Domain_Non_ML,exact_key,55555,2,0.0036000360003600037,0.0
+Within_Domain_Non_ML,normalized_key,54887,186,0.33887805855667097,9.13978494623656
+Within_Domain_Non_ML,near_key,4100,7,0.17073170731707318,57.14285714285714

@@ -1,0 +1,162 @@
+{
+  "metadata": {
+    "timestamp": "2026-11-21T16:36:12.068674",
+    "git_commit": "de369e9d5ed23549db18970d852c40f831f6e9d1",
+    "git_commit_date": "2026-11-21T16:31:13+07:00",
+    "git_branch": "main",
+    "git_dirty": true,
+    "library_versions": {
+      "pandas": "3.1.1",
+      "numpy": "2.5.5",
+      "scikit-learn": "1.9.1",
+      "pyarrow": "26.0.1",
+      "transformers": "4.57.6",
+      "torch": "2.14.1+cu130",
+      "pyyaml": "6.0.3"
+    },
+    "data_sha256": {
+      "jit_random_train": "347792c217919387323f49a7c52c6741ad0e61309f1d8c6bc30df2262a628076",
+      "jit_random_test": "b77d63dcbb4c9a48e08fd2fe28b8d7798625df67e9d80ec86f7a9fdd1b35189d",
+      "jit_random_val": "5093e1ce700e1139138cbed03ed157b4bfbe9abca363924e17a45f1627756542",
+      "repository_mapping": "de2cf0ed1cf6a0797348a0c27a18858aa51a84381e95723efa341a5b8a487b62"
+    },
+    "checkpoints_run": [
+      "checkpoint_14",
+      "checkpoint_15",
+      "checkpoint_16",
+      "checkpoint_17"
+    ],
+    "total_warnings": 7
+  },
+  "warnings": [
+    {
+      "id": "W001",
+      "severity": "warning",
+      "message": "  Shortcut candidate: files_in_commit within-repo AUC 0.624"
+    },
+    {
+      "id": "W002",
+      "severity": "warning",
+      "message": "  Repository is easy to guess (repo_from_diff_content): accuracy 0.949 vs majority 0.063"
+    },
+    {
+      "id": "W003",
+      "severity": "warning",
+      "message": "  Repository is easy to guess (repo_from_file_path): accuracy 0.985 vs majority 0.063"
+    },
+    {
+      "id": "W004",
+      "severity": "warning",
+      "message": "  NonML_to_ML: 1.25% of test rows have a normalized_key twin in train"
+    },
+    {
+      "id": "W005",
+      "severity": "warning",
+      "message": "  Prevalence shift in Group_KFold_Non_ML fold 0: train 46.6% -> test 36.6% (-10.0 pp); compare PR-AUC against prevalence"
+    },
+    {
+      "id": "W006",
+      "severity": "warning",
+      "message": "  Prevalence shift in Group_KFold_Non_ML fold 2: train 40.0% -> test 60.0% (+20.0 pp); compare PR-AUC against prevalence"
+    },
+    {
+      "id": "W007",
+      "severity": "warning",
+      "message": "  Working tree has uncommitted changes; commit first so the recorded commit describes this run"
+    }
+  ],
+  "checkpoint_summary": {
+    "checkpoint_14": {
+      "n_rows": 210156,
+      "shortcut_candidates": [
+        "files_in_commit"
+      ],
+      "signal_auc_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\path_metadata_signal_auc.csv",
+      "path_text_probe_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\path_text_probe.csv",
+      "files_in_commit_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\files_in_commit_prevalence.csv",
+      "commit_year_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\commit_year_prevalence.csv"
+    },
+    "checkpoint_15": {
+      "sample_rows": 47775,
+      "repo_probe": [
+        {
+          "probe": "repo_from_diff_content",
+          "n_rows": 47775,
+          "n_classes": 24,
+          "majority_rate": 0.06279434850863422,
+          "accuracy": 0.9489063317634746,
+          "accuracy_lift": 15.111333333333334,
+          "macro_f1": 0.937581119478942
+        },
+        {
+          "probe": "repo_from_file_path",
+          "n_rows": 47775,
+          "n_classes": 24,
+          "majority_rate": 0.06279434850863422,
+          "accuracy": 0.9848456305599163,
+          "accuracy_lift": 15.683666666666667,
+          "macro_f1": 0.9841624097447684
+        }
+      ],
+      "domain_probe": {
+        "probe": "domain_from_diff_content_unseen_repos",
+        "n_rows": 47775,
+        "ml_dl_share": 0.3169440083725798,
+        "roc_auc": 0.7949099549302608,
+        "balanced_accuracy": 0.7100457531236091,
+        "recall_ml_dl": 0.5256901334037776,
+        "recall_non_ml": 0.8944013728434407
+      },
+      "probe_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\repository_identity_probe.csv",
+      "recall_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\repository_identity_recall.csv"
+    },
+    "checkpoint_16": {
+      "n_rows": 210156,
+      "near_pairs": 55796,
+      "skipped_buckets": 333,
+      "key_summary": [
+        {
+          "key": "exact_key",
+          "rows": 210156,
+          "duplicate_groups": 2334,
+          "duplicate_rows": 5595,
+          "duplicate_pct": 2.662307999771598,
+          "cross_repo_groups": 2,
+          "cross_domain_groups": 0,
+          "label_conflict_groups": 773,
+          "largest_group": 77
+        },
+        {
+          "key": "normalized_key",
+          "rows": 208822,
+          "duplicate_groups": 7059,
+          "duplicate_rows": 27748,
+          "duplicate_pct": 13.287871967513002,
+          "cross_repo_groups": 162,
+          "cross_domain_groups": 56,
+          "label_conflict_groups": 1114,
+          "largest_group": 421
+        },
+        {
+          "key": "near_key",
+          "rows": 14082,
+          "duplicate_groups": 4370,
+          "duplicate_rows": 14082,
+          "duplicate_pct": 100.0,
+          "cross_repo_groups": 15,
+          "cross_domain_groups": 5,
+          "label_conflict_groups": 869,
+          "largest_group": 206
+        }
+      ],
+      "key_summary_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\duplicate_key_summary.csv",
+      "split_exposure_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\duplicate_split_exposure.csv"
+    },
+    "checkpoint_17": {
+      "per_repo_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\prevalence_per_repo.csv",
+      "scenario_csv": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\dataset_exploratory\\DefectorsDatasetExplorer\\20261121_163332\\prevalence_shift_scenarios.csv",
+      "flagged_runs": 2,
+      "max_abs_shift_pp": 20.01485881739339
+    }
+  }
+}
