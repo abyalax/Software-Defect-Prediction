@@ -19,7 +19,7 @@ from software_defects.data.defectors.split_generator import (
 from software_defects.models.length_logreg import LengthLogRegBaseline
 from software_defects.models.tfidf_logreg import BaselineConfig, TfidfLogRegBaseline
 from software_defects.reporting.reporter import ReportWritter
-from software_defects.utils import get_device
+from software_defects.reporting.utils import get_device
 
 if TYPE_CHECKING:
     from software_defects.config import DatasetConfig

@@ -15,7 +15,7 @@ from software_defects.data.defectors.split_generator import (
 )
 from software_defects.data.defectors.tokenizer import DefectorsTokenizer
 from software_defects.reporting.reporter import ReportWritter
-from software_defects.utils import get_device
+from software_defects.reporting.utils import get_device
 
 if TYPE_CHECKING:
     from software_defects.config import DatasetConfig
