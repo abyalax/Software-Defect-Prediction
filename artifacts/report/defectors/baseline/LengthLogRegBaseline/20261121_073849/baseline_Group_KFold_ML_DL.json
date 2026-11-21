@@ -1,0 +1,31 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects run-baseline --dataset defectors --scenario Group_KFold_ML_DL --model length --seeds 42,43,44",
+  "scenario": "Group_KFold_ML_DL",
+  "model": "length",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "equalize_train_size": null,
+  "exclude_repos": null,
+  "n_runs": 15,
+  "mean": {
+    "pr_auc": 0.5686,
+    "f1": 0.6585,
+    "mcc": 0.1609,
+    "roc_auc": 0.6126,
+    "train_seconds": 0.3756,
+    "inference_seconds": 0.0808
+  },
+  "std": {
+    "pr_auc": 0.0525,
+    "f1": 0.0385,
+    "mcc": 0.0495,
+    "roc_auc": 0.0191,
+    "train_seconds": 0.0526,
+    "inference_seconds": 0.0465
+  },
+  "results_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\LengthLogRegBaseline\\20261121_073849\\baseline_results.csv",
+  "per_repo_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\baseline\\LengthLogRegBaseline\\20261121_073849\\baseline_per_repo.csv"
+}
