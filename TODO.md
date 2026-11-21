@@ -15,11 +15,11 @@
 - [x] P1.1 Buang freqtrade dan baris content kosong (210,156 baris tersisa)
 - [x] P1.2 Label biner dari `lines` dan unit analisis file-level
 - [x] P1.3 Tokenisasi CodeBERT dan CodeT5-small di pipeline dengan max_length 512
-- [ ] P1.4 Implementasi truncation hunk-aware (pertahankan hunk header, prioritaskan baris +/-, bagi budget token antar hunk)
-- [ ] P1.5 Implementasi input "path file + diff lengkap" untuk kedua model (path selalu di awal dan tidak terpotong)
-- [ ] P1.6 Pra-potong diff berukuran ekstrem sebelum tokenisasi agar pipeline cepat
-- [ ] P1.7 Verifikasi tokenisasi per scenario (persen terpotong di train/val/test, special token, path utuh) dan unit test
-- [ ] P1.8 Dokumentasikan semua langkah preprocessing untuk bab metodologi
+- [x] P1.4 Implementasi truncation hunk-aware (pertahankan hunk header, prioritaskan baris +/-, bagi budget token antar hunk; `diff_truncator.py`)
+- [x] P1.5 Implementasi input "path file + diff lengkap" untuk kedua model (path selalu di awal dan tidak terpotong; `diff_input_builder.py`)
+- [x] P1.6 Pra-potong diff berukuran ekstrem sebelum tokenisasi agar pipeline cepat
+- [x] P1.7 Verifikasi tokenisasi per scenario (persen terpotong di train/val/test, special token, path utuh) dan unit test (perintah `verify-tokenization`; angka pada tokenizer asli menunggu run)
+- [x] P1.8 Dokumentasikan semua langkah preprocessing untuk bab metodologi (`docs/PREPROCESSING.md`)
 
 ## P2. Data Splitting
 - [x] P2.1 Holdout repo eksplisit di YAML (ML/DL: jax, lightning; non-ML: airflow, ansible, black, celery)

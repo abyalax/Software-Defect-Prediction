@@ -205,7 +205,7 @@ class TestRunReport:
     """Checkpoint 18 and checkpoint ordering."""
 
     def test_run_report_is_always_last(self) -> None:
-        assert DefectorsDatasetExplorer.execution_order([18, 18, 3, 14, 3]) == [3, 14, 18, 18]
+        assert DefectorsDatasetExplorer.execution_order([18, 18, 3, 14, 3]) == [3, 14, 18]
         assert DefectorsDatasetExplorer.execution_order([1, 2]) == [1, 2]
 
     def test_report_records_git_state_and_hashes(self, raw_project: Path, config: DatasetConfig) -> None:

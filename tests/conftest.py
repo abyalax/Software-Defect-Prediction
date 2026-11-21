@@ -83,3 +83,42 @@ def write_raw_jit(project_root: Path, df: pd.DataFrame) -> None:
     }
     for name, part in parts.items():
         part.to_parquet(raw / f"{name}.parquet.gzip", compression="gzip", index=False)
+
+
+def _train_roberta_like_tokenizer():
+    """Train a tiny byte-level BPE with RoBERTa special tokens (the structure of CodeBERT/CodeT5 tokenizers)."""
+    from tokenizers import Tokenizer, decoders, models, pre_tokenizers, processors, trainers
+    from transformers import PreTrainedTokenizerFast
+
+    corpus = [
+        "@@ -1,3 +1,4 @@\n+x0 = 0\n-y1 = 1\n def foo(self, value):\n     return value\n",
+        "import os\nimport sys\nclass Model:\n    def forward(self, x):\n        return x + 1\n",
+        "src/pkg/module/file.py tests/test_file.py airflow/models/dag.py\n",
+    ] * 20
+    specials = ["<s>", "<pad>", "</s>", "<unk>", "<mask>"]
+    tokenizer = Tokenizer(models.BPE(unk_token="<unk>"))
+    tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
+    tokenizer.decoder = decoders.ByteLevel()
+    trainer = trainers.BpeTrainer(
+        vocab_size=400, special_tokens=specials, initial_alphabet=pre_tokenizers.ByteLevel.alphabet()
+    )
+    tokenizer.train_from_iterator(corpus, trainer)
+    tokenizer.post_processor = processors.RobertaProcessing(
+        sep=("</s>", tokenizer.token_to_id("</s>")), cls=("<s>", tokenizer.token_to_id("<s>"))
+    )
+    return PreTrainedTokenizerFast(
+        tokenizer_object=tokenizer,
+        bos_token="<s>",
+        eos_token="</s>",
+        sep_token="</s>",
+        cls_token="<s>",
+        unk_token="<unk>",
+        pad_token="<pad>",
+        mask_token="<mask>",
+    )
+
+
+@pytest.fixture(scope="session")
+def roberta_like_tokenizer():
+    """Offline stand-in for the CodeBERT/CodeT5 tokenizers (the real ones need a download)."""
+    return _train_roberta_like_tokenizer()

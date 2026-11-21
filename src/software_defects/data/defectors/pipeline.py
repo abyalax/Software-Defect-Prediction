@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -15,6 +16,7 @@ from software_defects.data.defectors.split_generator import (
 )
 from software_defects.data.defectors.tokenizer import DefectorsTokenizer
 from software_defects.reporting.reporter import ReportWritter
+from software_defects.utils import get_device
 
 if TYPE_CHECKING:
     from software_defects.config import DatasetConfig
@@ -71,6 +73,11 @@ class DefectorsDataPipeline:
         self._reporter.display_section("Defectors Data Pipeline")
         self._reporter.display_text()
 
+        # Detect and report device
+        device = get_device()
+        self._reporter.display_text(f"Device: {device}")
+        self._reporter.display_text()
+
         # Step 1: Load all data
         self._reporter.display_text("Step 1: Loading data...")
         jit_train = self._loader.load_jit_train()
@@ -83,6 +90,7 @@ class DefectorsDataPipeline:
         # Update summary with data loading information
         self._reporter.update_summary(
             {
+                "device": device,
                 "total_records": len(all_data),
                 "train_records": len(jit_train),
                 "test_records": len(jit_test),
@@ -146,22 +154,31 @@ class DefectorsDataPipeline:
         tokenized_data = {}
         tokenizer_stats = {}
         if tokenize:
-            self._reporter.display_text(f"Step 4: Tokenizing (max_length={self._config.tokenizer_max_length})...")
+            self._reporter.display_text(
+                "Step 4: Building 'path + diff' inputs and tokenizing "
+                f"(max_length={self._config.tokenizer_max_length})..."
+            )
             for model_key, tokenizer in self._tokenizers.items():
-                self._reporter.display_text(f"  Tokenizing with {model_key} ({tokenizer._model_name})...")
+                self._reporter.display_text(f"  Tokenizing with {model_key} ({tokenizer.model_name})...")
                 train_df_tok = tokenizer.tokenize_dataframe(train_df.copy(), truncation=True)
                 val_df_tok = tokenizer.tokenize_dataframe(val_df.copy(), truncation=True)
                 test_df_tok = tokenizer.tokenize_dataframe(test_df.copy(), truncation=True)
 
-                train_stats = tokenizer.get_statistics(train_df_tok)
-                test_stats = tokenizer.get_statistics(test_df_tok)
-
-                self._reporter.display_text(
-                    f"    Train - Mean tokens: {train_stats['mean']:.2f}, Truncated: {train_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
-                )
-                self._reporter.display_text(
-                    f"    Test - Mean tokens: {test_stats['mean']:.2f}, Truncated: {test_stats.get('truncated_percentage', 0):.2f}%"  # noqa: E501
-                )
+                split_stats = {
+                    "train": tokenizer.get_statistics(train_df_tok),
+                    "val": tokenizer.get_statistics(val_df_tok),
+                    "test": tokenizer.get_statistics(test_df_tok),
+                }
+                for split_name, stats in split_stats.items():
+                    self._reporter.display_text(
+                        f"    {split_name.capitalize():5} - mean tokens: {stats['mean']:.2f}, "
+                        f"truncated: {stats['truncated_percentage']:.2f}%, "
+                        f"pre-cut: {stats['pre_cut_percentage']:.2f}%, "
+                        f"changed lines kept: {stats['changed_lines_kept_percentage']:.2f}%, "
+                        f"fallback: {stats['fallback_truncation_count']}"
+                    )
+                train_stats = split_stats["train"]
+                test_stats = split_stats["test"]
 
                 tokenized_data[model_key] = {
                     "train": train_df_tok,
@@ -169,7 +186,8 @@ class DefectorsDataPipeline:
                     "test": test_df_tok,
                 }
                 tokenizer_stats[model_key] = {
-                    "tokenizer_model": tokenizer._model_name,
+                    "tokenizer_model": tokenizer.model_name,
+                    "diff_input": asdict(self._config.diff_input),
                     "tokenizer_max_length": self._config.tokenizer_max_length,
                     "train_mean_tokens": train_stats["mean"],
                     "train_median_tokens": train_stats["median"],
@@ -177,6 +195,7 @@ class DefectorsDataPipeline:
                     "test_mean_tokens": test_stats["mean"],
                     "test_median_tokens": test_stats["median"],
                     "test_truncated_pct": test_stats.get("truncated_percentage", 0),
+                    "splits": split_stats,
                 }
             self._reporter.display_text()
 

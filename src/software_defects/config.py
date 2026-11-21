@@ -7,6 +7,22 @@ from pathlib import Path
 
 
 @dataclass(frozen=True)
+class DiffInputConfig:
+    """Settings of the model input built from a file path and its diff."""
+
+    # False drops the path (used by the input ablation); the default puts the path first in every input
+    include_path: bool = True
+    # Paths longer than this many tokens are shortened from the left (directories first, filename last)
+    path_max_tokens: int = 64
+    # Diffs longer than this many characters are pre-cut (hunk-aware) before tokenization to keep the pipeline fast
+    pre_cut_chars: int = 16_000
+    # Hunk headers may use at most this share of the diff token budget
+    header_share: float = 0.5
+    # How many times the diff budget is tightened when the assembled text still exceeds the limit
+    max_refits: int = 4
+
+
+@dataclass(frozen=True)
 class DatasetConfig:
     """High-level settings of the transaction dataset."""
 
@@ -16,6 +32,7 @@ class DatasetConfig:
     dtype: dict[str, str] | None = None
     # CodeBERT (RoBERTa) has 512 position embeddings, so 512 is the largest length both models can share
     tokenizer_max_length: int = 512
+    diff_input: DiffInputConfig = field(default_factory=DiffInputConfig)
     tokenizer_models: dict[str, str] = field(
         default_factory=lambda: {
             "codebert": "microsoft/codebert-base",

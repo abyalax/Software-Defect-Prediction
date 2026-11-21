@@ -5,7 +5,7 @@ File Structure
     └── 📁artifacts ('all here is example expected structure')
         └── 📁model
             └── 📁exampledomain
-                ├── lstm_ae_w1_best.pt
+                ├── lstm_ae_w1_best.pt   # format naming [modelname]_[windowconfig]_best.pt
                 ├── lstm_ae_w10_best.pt
                 ├── lstm_ae_w3_best.pt
                 ├── lstm_ae_w5_best.pt

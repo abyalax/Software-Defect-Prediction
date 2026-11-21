@@ -162,4 +162,38 @@ class ParserArgs:
             help="Fold index (0-4) for the Group_KFold scenarios. Runs all 5 folds if not specified.",
         )
 
+        verify_parser = subparsers.add_parser(
+            "verify-tokenization",
+            help="Verify the tokenized model inputs of a scenario (truncation share, special tokens, intact path).",
+        )
+        ParserArgs._add_dataset_arguments(verify_parser)
+        verify_parser.add_argument(
+            "--scenario",
+            type=str,
+            required=True,
+            choices=[
+                "ML_to_NonML",
+                "NonML_to_ML",
+                "Repository_Level_Split",
+                "Within_Domain_ML_DL",
+                "Within_Domain_Non_ML",
+                "Group_KFold_ML_DL",
+                "Group_KFold_Non_ML",
+            ],
+            help="Split scenario to verify.",
+        )
+        verify_parser.add_argument(
+            "--input-dir",
+            type=Path,
+            default=None,
+            help="Directory containing processed parquet files from the pipeline (default: data/processed/defectors).",
+        )
+        verify_parser.add_argument(
+            "--fold",
+            type=int,
+            default=None,
+            choices=range(5),
+            help="Fold index (0-4) for the Group_KFold scenarios. Verifies all 5 folds if not specified.",
+        )
+
         return parser

@@ -140,3 +140,30 @@ class RunnerCLI:
             fold=fold,
         )
         return 0
+
+    @staticmethod
+    def run_verify_tokenization(
+        project_root: Path,
+        dataset: str,
+        scenario: str,
+        input_dir: Path | None,
+        fold: int | None = None,
+    ) -> int:
+        """Verify the tokenized model inputs of one scenario; returns 1 when a check fails."""
+        from software_defects.config import DatasetConfig
+        from software_defects.data.defectors.split_generator import SplitScenario
+        from software_defects.data.defectors.tokenization_verifier import CHECK_COLUMNS, TokenizationVerifier
+
+        dataset_config = DatasetConfig(
+            project_root=project_root,
+            dataset_name=dataset,
+        )
+
+        if input_dir is None:
+            input_dir = dataset_config.processed_dir
+
+        report = TokenizationVerifier(config=dataset_config, input_dir=input_dir).run(
+            scenario=SplitScenario(scenario),
+            fold=fold,
+        )
+        return 1 if int(report[CHECK_COLUMNS].sum().sum()) else 0

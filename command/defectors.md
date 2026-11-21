@@ -203,18 +203,6 @@ The exploratory performs the following checkpoints:
   - Label prevalence by file extension analysis
   - CSV output with shortcut_signal_auc.csv
 
-- **Checkpoint 18: Run Report** (always runs last, whatever the checkpoint order requested)
-  - Compilation of all warnings from the other checkpoints
-  - Combined JSON report with metadata: timestamp, git commit, commit date, branch, `git_dirty`,
-    library versions, SHA-256 of the three JIT parquet files and of the repository mapping, and the
-    checkpoints that ran
-  - A warning is raised when the working tree is dirty, so commit first and run `inspect-data` after
-    the commit; the recorded commit then describes the code that produced the report
-  - Structured warnings with severity levels
-  - Markdown summary report
-  - JSON output with combined_run_report.json
-  - Markdown output with combined_run_report.md
-
 - **Checkpoint 14: Path, Files-per-Commit and Commit-Time Shortcut Probe** (P0.6)
   - Single-signal ROC-AUC for path depth/length, file name length, test-file and `__init__.py` flags,
     files changed in the same commit, commit day, hour and weekday, as pooled AUC and as
@@ -243,6 +231,18 @@ The exploratory performs the following checkpoints:
   - Train/val/test prevalence and test-minus-train shift for every scenario and every Group K-Fold fold,
     produced by the real split generator; shifts of 10 percentage points or more raise a warning
   - CSV output with prevalence_per_repo.csv, prevalence_shift_scenarios.csv
+
+- **Checkpoint 18: Run Report** (always runs last, whatever the checkpoint order requested)
+  - Compilation of all warnings from the other checkpoints
+  - Combined JSON report with metadata: timestamp, git commit, commit date, branch, `git_dirty`,
+    library versions, SHA-256 of the three JIT parquet files and of the repository mapping, and the
+    checkpoints that ran
+  - A warning is raised when the working tree is dirty, so commit first and run `inspect-data` after
+    the commit; the recorded commit then describes the code that produced the report
+  - Structured warnings with severity levels
+  - Markdown summary report
+  - JSON output with combined_run_report.json
+  - Markdown output with combined_run_report.md
 
 **Run only the new probes**:
 
@@ -327,7 +327,10 @@ The data pipeline performs the following steps:
 1. **Load Data**: Combine train, test, and val splits from the original dataset
 2. **Generate Split**: Apply the specified split scenario with repository-level holdout
 3. **Aggregate** (optional): Aggregate file-level data to commit-level using max() rule for labels
-4. **Tokenize** (optional): Apply HuggingFace tokenizers for multiple models (CodeBERT and CodeT5-small)
+4. **Tokenize** (optional): Build the model input `path + diff` for each model (CodeBERT and CodeT5-small). Diffs
+   above 16,000 characters are pre-cut, and inputs above 512 tokens are shrunk hunk-aware: hunk headers are kept,
+   added/removed lines take priority, and the budget is shared fairly between hunks. The path is always the first
+   line and is never truncated. Details: `docs/PREPROCESSING.md`
 5. **Save** (optional): Save processed data to Parquet files with model-specific directories
 
 List Scenario
@@ -402,8 +405,14 @@ For `Group_KFold_ML_DL` and `Group_KFold_Non_ML` the same layout is repeated ins
 Columns:
 - `datetime`, `commit`, `repo`, `filepath`, `content`, `methods`, `lines` (original)
 - `label` (binary: 0/1)
-- `token_count` (if tokenized)
-- `truncated` (if tokenized)
+
+Model-specific files (`codebert/`, `codet5/`) add, when tokenized:
+- `model_input` (`path + diff` text), `token_count` (final length, special tokens included, at most 512)
+- `truncated`, `pre_cut`, `fallback_truncation`, `path_shortened` (booleans)
+- `full_tokens`, `hunks_total`, `hunks_kept`, `changed_total`, `changed_kept`
+
+`truncated` is now computed from what the preprocessing dropped. Pipeline reports written before this change always
+show 0% truncated (the old flag compared an already truncated length with the limit) and must not be quoted.
 
 ### Commit-Level Output
 Columns:
@@ -420,6 +429,20 @@ The pipeline saves the following artifacts under `artifacts/report/defectors/dat
   - Split information (scenario, sample counts, defective percentages, repository lists)
   - Tokenization statistics for each model (mean/median tokens, truncation percentages)
   - Output paths for raw and model-specific tokenized data
+
+### 3. Verify Tokenization
+
+Re-encode the processed `model_input` of a scenario and check the preprocessing contract (no input above 512 tokens,
+special tokens present, path intact at the start, stored `token_count` correct). Also reports the share of truncated
+rows per split. Requires `run-pipeline` without `--no-tokenize` first.
+
+```Shell
+uv run python -m software_defects verify-tokenization --dataset defectors --scenario <SCENARIO> [--fold N] [--input-dir DIR]
+```
+
+- `--fold` : Fold index (0-4), only for the Group K-Fold scenarios. If omitted, all 5 folds are verified.
+- Exit code is 1 when any check fails, 0 otherwise.
+- Report: `artifacts/report/defectors/data_pipeline/TokenizationVerifier/<timestamp>/tokenization_<scenario>.{txt,json,csv}`
 
 ### Split Scenarios
 

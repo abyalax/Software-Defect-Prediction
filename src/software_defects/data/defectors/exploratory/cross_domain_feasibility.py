@@ -58,7 +58,7 @@ class CrossDomainFeasibility:
                 if len(ml_dl_df) > 0:
                     ml_dl_positives = ml_dl_df["label"].sum()
                     self._reporter.display_text(
-                        f"  ML/DL: {len(ml_dl_df):,} rows, {ml_dl_positives:,} positives ({ml_dl_positives / len(ml_dl_df) * 100:.2f}%)"
+                        f"  ML/DL: {len(ml_dl_df):,} rows, {ml_dl_positives:,} positives ({ml_dl_positives / len(ml_dl_df) * 100:.2f}%)"  # noqa: E501
                     )
                 else:
                     self._reporter.display_text("  ML/DL: No data")
@@ -66,7 +66,7 @@ class CrossDomainFeasibility:
                 if len(non_ml_df) > 0:
                     non_ml_positives = non_ml_df["label"].sum()
                     self._reporter.display_text(
-                        f"  Non-ML: {len(non_ml_df):,} rows, {non_ml_positives:,} positives ({non_ml_positives / len(non_ml_df) * 100:.2f}%)"
+                        f"  Non-ML: {len(non_ml_df):,} rows, {non_ml_positives:,} positives ({non_ml_positives / len(non_ml_df) * 100:.2f}%)"  # noqa: E501
                     )
                 else:
                     self._reporter.display_text("  Non-ML: No data")

@@ -43,6 +43,13 @@ class CommandCLI:
                 arguments.exclude_repos,
                 arguments.fold,
             ),
+            "verify-tokenization": lambda: RunnerCLI.run_verify_tokenization(
+                project_root,
+                arguments.dataset,
+                arguments.scenario,
+                arguments.input_dir,
+                arguments.fold,
+            ),
         }
 
         try:
