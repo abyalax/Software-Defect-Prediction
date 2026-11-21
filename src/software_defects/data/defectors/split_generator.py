@@ -23,8 +23,6 @@ class SplitScenario(Enum):
     REPO_LEVEL_SPLIT = "Repository_Level_Split"
     WITHIN_DOMAIN_ML_DL = "Within_Domain_ML_DL"
     WITHIN_DOMAIN_NON_ML = "Within_Domain_Non_ML"
-    LEAVE_REPO_OUT_ML_DL = "Leave_Repo_Out_ML_DL"
-    LEAVE_REPO_OUT_NON_ML = "Leave_Repo_Out_Non_ML"
     GROUP_KFOLD_ML_DL = "Group_KFold_ML_DL"
     GROUP_KFOLD_NON_ML = "Group_KFold_Non_ML"
     CROSS_DOMAIN_DEFAULT = "Cross_Domain_Default"
@@ -170,10 +168,6 @@ class DefectorsSplitGenerator:
             return self._split_within_domain_ml_dl(df, val_ratio, equalize_train_size, seed)
         elif scenario == SplitScenario.WITHIN_DOMAIN_NON_ML:
             return self._split_within_domain_non_ml(df, val_ratio, equalize_train_size, seed)
-        elif scenario == SplitScenario.LEAVE_REPO_OUT_ML_DL:
-            return self._split_leave_repo_out_ml_dl(df, val_ratio, equalize_train_size, seed)
-        elif scenario == SplitScenario.LEAVE_REPO_OUT_NON_ML:
-            return self._split_leave_repo_out_non_ml(df, val_ratio, equalize_train_size, seed)
         elif scenario == SplitScenario.GROUP_KFOLD_ML_DL:
             return self._split_group_kfold_ml_dl(df, val_ratio, equalize_train_size, seed, fold=fold)
         elif scenario == SplitScenario.GROUP_KFOLD_NON_ML:
@@ -364,96 +358,6 @@ class DefectorsSplitGenerator:
 
         return SplitResult(
             scenario=SplitScenario.WITHIN_DOMAIN_NON_ML.value,
-            train_df=train_df,
-            val_df=val_df,
-            test_df=test_df,
-            train_repos=train_repos,
-            val_repos=sorted(val_df["repo"].unique().tolist()),
-            test_repos=test_repos,
-            train_samples=len(train_df),
-            val_samples=len(val_df),
-            test_samples=len(test_df),
-            train_defective_pct=float(train_df["label"].mean() * 100),
-            val_defective_pct=float(val_df["label"].mean() * 100),
-            test_defective_pct=float(test_df["label"].mean() * 100),
-            is_cross_domain=False,
-        )
-
-    def _split_leave_repo_out_ml_dl(
-        self,
-        df: pd.DataFrame,
-        val_ratio: float,
-        equalize_train_size: int | None,
-        seed: int,
-    ) -> SplitResult:
-        """Split: Leave-one-repo-out for ML/DL domain."""
-        ml_dl_df = df[df["repo"].isin(self._ml_dl_repos)].copy()
-        ml_dl_repos = sorted(ml_dl_df["repo"].unique().tolist())
-
-        if len(ml_dl_repos) < 2:
-            raise ValueError("Need at least 2 ML/DL repos for leave-repo-out split")
-
-        # Holdout one repo for test
-        test_repos = [ml_dl_repos[0]]
-        train_repos = ml_dl_repos[1:]
-
-        train_df = ml_dl_df[ml_dl_df["repo"].isin(train_repos)].copy()
-        test_df = ml_dl_df[ml_dl_df["repo"].isin(test_repos)].copy()
-
-        # Split train into train/val by commit
-        train_df, val_df = self._split_train_val_by_commit(train_df, val_ratio, seed)
-
-        # Equalize train size if requested
-        if equalize_train_size is not None and len(train_df) > equalize_train_size:
-            train_df = train_df.sample(n=equalize_train_size, random_state=seed)
-
-        return SplitResult(
-            scenario=SplitScenario.LEAVE_REPO_OUT_ML_DL.value,
-            train_df=train_df,
-            val_df=val_df,
-            test_df=test_df,
-            train_repos=train_repos,
-            val_repos=sorted(val_df["repo"].unique().tolist()),
-            test_repos=test_repos,
-            train_samples=len(train_df),
-            val_samples=len(val_df),
-            test_samples=len(test_df),
-            train_defective_pct=float(train_df["label"].mean() * 100),
-            val_defective_pct=float(val_df["label"].mean() * 100),
-            test_defective_pct=float(test_df["label"].mean() * 100),
-            is_cross_domain=False,
-        )
-
-    def _split_leave_repo_out_non_ml(
-        self,
-        df: pd.DataFrame,
-        val_ratio: float,
-        equalize_train_size: int | None,
-        seed: int,
-    ) -> SplitResult:
-        """Split: Leave-one-repo-out for Non-ML domain."""
-        non_ml_df = df[df["repo"].isin(self._non_ml_repos)].copy()
-        non_ml_repos = sorted(non_ml_df["repo"].unique().tolist())
-
-        if len(non_ml_repos) < 2:
-            raise ValueError("Need at least 2 Non-ML repos for leave-repo-out split")
-
-        # Holdout one repo for test
-        test_repos = [non_ml_repos[0]]
-        train_repos = non_ml_repos[1:]
-
-        train_df = non_ml_df[non_ml_df["repo"].isin(train_repos)].copy()
-        test_df = non_ml_df[non_ml_df["repo"].isin(test_repos)].copy()
-
-        # Split train into train/val by commit
-        train_df, val_df = self._split_train_val_by_commit(train_df, val_ratio, seed)
-
-        # Equalize train size if requested
-        if equalize_train_size is not None and len(train_df) > equalize_train_size:
-            train_df = train_df.sample(n=equalize_train_size, random_state=seed)
-
-        return SplitResult(
-            scenario=SplitScenario.LEAVE_REPO_OUT_NON_ML.value,
             train_df=train_df,
             val_df=val_df,
             test_df=test_df,
