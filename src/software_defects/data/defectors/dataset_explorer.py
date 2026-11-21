@@ -8,12 +8,16 @@ from software_defects.data.defectors.dataset_loader import DefectorsDatasetLoade
 from software_defects.data.defectors.exploratory import (
     CrossDomainFeasibility,
     DatasetIntegrity,
+    DuplicateDiffAnalysis,
     JitInputValidity,
     LabelDistribution,
     LabelValidity,
     LeakageUnitAnalysis,
+    PathMetadataProbe,
+    PrevalenceShiftAnalysis,
     RecordReconciliation,
     RepositoryDomainValidity,
+    RepositoryIdentityProbe,
     RepositoryMapping,
     RepositorySplit,
     RunReport,
@@ -27,6 +31,9 @@ if TYPE_CHECKING:
     from software_defects.config import DatasetConfig
 
 
+RUN_REPORT_CHECKPOINT = 18
+
+
 class DefectorsDatasetExplorer:
     """Explore and analyze Defectors dataset following TODO.md checkpoints."""
 
@@ -35,7 +42,7 @@ class DefectorsDatasetExplorer:
 
         Args:
             config: Dataset configuration.
-            checkpoints: List of checkpoint numbers to run (1-14). If None, runs all checkpoints.
+            checkpoints: List of checkpoint numbers to run (1-18). If None, runs all checkpoints.
         """
         self._config = config
         self._loader = DefectorsDatasetLoader(config)
@@ -62,8 +69,30 @@ class DefectorsDatasetExplorer:
             11: RepositorySplit,
             12: TokenDistribution,
             13: ShortcutSignalCheck,
-            14: RunReport,
+            14: PathMetadataProbe,
+            15: RepositoryIdentityProbe,
+            16: DuplicateDiffAnalysis,
+            17: PrevalenceShiftAnalysis,
+            18: RunReport,
         }
+
+    @staticmethod
+    def execution_order(checkpoint_numbers: list[int]) -> list[int]:
+        """Sort checkpoints numerically, always running the run report (18) last.
+
+        The run report summarises the warnings and results of every other checkpoint, so it must run
+        after checkpoints with higher numbers too.
+
+        Args:
+            checkpoint_numbers: Requested checkpoint numbers.
+
+        Returns:
+            Unique checkpoint numbers in execution order.
+        """
+        unique = sorted(set(checkpoint_numbers))
+        return [n for n in unique if n != RUN_REPORT_CHECKPOINT] + (
+            [RUN_REPORT_CHECKPOINT] if RUN_REPORT_CHECKPOINT in unique else []
+        )
 
     def run(self) -> None:
         """Run dataset exploratory with specified checkpoints or all checkpoints."""
@@ -72,15 +101,16 @@ class DefectorsDatasetExplorer:
 
         # Determine which checkpoints to run
         if self._checkpoints is None:
-            checkpoint_numbers = list(range(1, 15))
+            checkpoint_numbers = sorted(self._checkpoint_classes)
         else:
             checkpoint_numbers = self._checkpoints
+        checkpoint_numbers = self.execution_order(checkpoint_numbers)
 
         self._reporter.display_text(f"Running checkpoints: {checkpoint_numbers}")
         self._reporter.display_text()
 
         # Run specified checkpoints
-        for checkpoint_num in sorted(checkpoint_numbers):
+        for checkpoint_num in checkpoint_numbers:
             if checkpoint_num in self._checkpoint_classes:
                 checkpoint_class = self._checkpoint_classes[checkpoint_num]
                 checkpoint = checkpoint_class(self._loader, self._reporter)

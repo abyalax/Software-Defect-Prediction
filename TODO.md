@@ -4,12 +4,12 @@
 - [x] P0.3 Pemetaan domain dan kelayakan cross-domain
 - [x] P0.4 Analisis token (CodeBERT 36.6% sampel > 512 token, CodeT5-small 25.5%)
 - [x] P0.5 Probing shortcut ukuran diff (ROC-AUC fitur tunggal sekitar 0.62–0.63)
-- [ ] P0.6 Probing shortcut path/nama file (path kini ikut jadi input), jumlah file per commit, dan waktu commit
-- [ ] P0.7 Probing identitas repo: seberapa mudah repo asal ditebak dari isi diff
-- [ ] P0.8 Cek duplikat dan near-duplicate diff lintas repo (hash content)
-- [ ] P0.9 Analisis pergeseran prevalensi per repo dan per fold
-- [ ] P0.10 Jalankan ulang `inspect-data` setelah commit agar laporan mencatat commit terbaru
-- [ ] P0.11 Samakan redaksi jumlah repositori di form dan skripsi (24 dipakai + freqtrade dikeluarkan)
+- [x] P0.6 Probing shortcut path/nama file (path kini ikut jadi input), jumlah file per commit, dan waktu commit (checkpoint 15; hasil menunggu run)
+- [x] P0.7 Probing identitas repo: seberapa mudah repo asal ditebak dari isi diff (checkpoint 16; hasil menunggu run)
+- [x] P0.8 Cek duplikat dan near-duplicate diff lintas repo (hash content) (checkpoint 17; hasil menunggu run)
+- [x] P0.9 Analisis pergeseran prevalensi per repo dan per fold (checkpoint 18; hasil menunggu run)
+- [x] P0.10 Jalankan ulang `inspect-data` setelah commit agar laporan mencatat commit terbaru (laporan kini mencatat commit, flag dirty, hash data; run ulang setelah commit patch ini)
+- [x] P0.11 Samakan redaksi jumlah repositori di form dan skripsi (24 dipakai + freqtrade dikeluarkan; redaksi baku di `docs/DATASET_SCOPE.md`)
 
 ## P1. Data Cleaning & Preprocessing
 - [x] P1.1 Buang freqtrade dan baris content kosong (210,156 baris tersisa)

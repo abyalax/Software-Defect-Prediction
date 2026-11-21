@@ -234,6 +234,22 @@ class ReportWritter:
             json.dump(data, f, indent=2)
         return json_path
 
+    def save_text(self, text: str, filename: str) -> Path:
+        """Save plain text (for example Markdown) to the report directory.
+
+        Args:
+            text: Text content to write.
+            filename: Name for the text file.
+
+        Returns:
+            Path to the saved file.
+        """
+        report_dir = self._get_report_path()
+        report_dir.mkdir(parents=True, exist_ok=True)
+        text_path = report_dir / filename
+        text_path.write_text(text, encoding="utf-8")
+        return text_path
+
     def get_warnings(self) -> tuple[str, ...]:
         """Get warnings displayed so far."""
         return self._reporter.warnings

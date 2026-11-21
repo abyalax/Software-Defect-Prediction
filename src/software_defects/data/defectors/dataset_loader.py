@@ -90,6 +90,20 @@ class DefectorsDatasetLoader:
         dfs = [self.load_jit_train(), self.load_jit_test(), self.load_jit_val()]
         return pd.concat(dfs, ignore_index=True)
 
+    def load_filtered_jit(self) -> pd.DataFrame:
+        """Load all JIT splits with the same filtering and labelling the pipeline applies.
+
+        Rows of unmapped repositories (freqtrade) and rows with an empty diff are dropped and a binary
+        ``label`` column is added, so exploratory checkpoints analyse exactly the data that is split
+        and trained on.
+
+        Returns:
+            DataFrame containing the filtered JIT data of every original split.
+        """
+        from software_defects.data.defectors.split_generator import DefectorsSplitGenerator
+
+        return DefectorsSplitGenerator(self._config).filter_data(self.load_all_jit())
+
     def load_all_line(self) -> pd.DataFrame:
         """Load all line-level splits combined.
 

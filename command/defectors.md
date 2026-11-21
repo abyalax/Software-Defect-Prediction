@@ -98,7 +98,7 @@ The first run requires internet access to download tokenizers. They are cached l
 
 ### 1. Run Dataset Exploratory
 
-Run the complete dataset exploratory with all 14 checkpoints:
+Run the complete dataset exploratory with all 18 checkpoints:
 
 ```Shell
 uv run python -m software_defects inspect-data --dataset defectors
@@ -137,19 +137,19 @@ The exploratory performs the following checkpoints:
     - P99: 14,951 chars
 
 - **Checkpoint 4: Repository and Domain Validity**
-  - 26 repositories total (7 ML/DL, 19 Non-ML)
+  - 24 repositories used (7 ML/DL, 17 Non-ML) plus `freqtrade` (1 record, unmapped, excluded): 25 `repo` values in the files
   - Top repositories: ansible (39,060), sentry (33,506), core (33,292)
   - 81,778 unique commits
   - Mean files per commit: 2.37
 
 - **Checkpoint 5: Leakage and Unit Analysis**
   - No duplicate (repo+commit+filepath) records
-  - Repository overlap: 25 out of 26 repositories overlap between train and test
+  - Repository overlap: 24 out of 24 used repositories overlap between train and test
   - WARNING: Current splits have repository overlap - need repository-level split for valid evaluation
 
 - **Checkpoint 6: Cross-domain Feasibility**
   - ML/DL repositories: 7 (lightning, jax, transformers, ray, scikit-learn, yolov5, spaCy)
-  - Non-ML repositories: 19
+  - Non-ML repositories: 17
   - Label distribution by domain (train):
     - ML/DL: 48.70% defective
     - Non-ML: 46.81% defective
@@ -203,19 +203,58 @@ The exploratory performs the following checkpoints:
   - Label prevalence by file extension analysis
   - CSV output with shortcut_signal_auc.csv
 
-- **Checkpoint 14: Run Report**
-  - Compilation of all warnings from previous checkpoints
-  - Combined JSON report with metadata (timestamp, git commit, library versions)
+- **Checkpoint 18: Run Report** (always runs last, whatever the checkpoint order requested)
+  - Compilation of all warnings from the other checkpoints
+  - Combined JSON report with metadata: timestamp, git commit, commit date, branch, `git_dirty`,
+    library versions, SHA-256 of the three JIT parquet files and of the repository mapping, and the
+    checkpoints that ran
+  - A warning is raised when the working tree is dirty, so commit first and run `inspect-data` after
+    the commit; the recorded commit then describes the code that produced the report
   - Structured warnings with severity levels
   - Markdown summary report
   - JSON output with combined_run_report.json
   - Markdown output with combined_run_report.md
 
+- **Checkpoint 14: Path, Files-per-Commit and Commit-Time Shortcut Probe** (P0.6)
+  - Single-signal ROC-AUC for path depth/length, file name length, test-file and `__init__.py` flags,
+    files changed in the same commit, commit day, hour and weekday, as pooled AUC and as
+    within-repository AUC (the pooled value mixes in prevalence differences between repositories)
+  - Path-only and file-name-only TF-IDF + Logistic Regression probes under 5-fold cross-validation
+    grouped by repository (PR-AUC and lift over prevalence on unseen repositories)
+  - Prevalence by files-per-commit bucket and by commit year and domain
+  - CSV output with path_metadata_signal_auc.csv, path_text_probe.csv, files_in_commit_prevalence.csv,
+    commit_year_prevalence.csv
+
+- **Checkpoint 15: Repository Identity Probe** (P0.7)
+  - Repository identification from the diff text and from the file path (linear SVM, 5-fold grouped by
+    commit, at most 3,000 rows per repository): accuracy, lift over the majority rate, macro-F1, per-repo recall
+  - Domain identification (ML/DL vs non-ML) from the diff text on repositories never seen in training
+  - CSV output with repository_identity_probe.csv, repository_identity_recall.csv
+
+- **Checkpoint 16: Duplicate and Near-Duplicate Diffs** (P0.8)
+  - Exact duplicates (hash of the raw diff), normalized duplicates (changed lines only, whitespace and hunk
+    offsets ignored) and near duplicates (MinHash with banding, verified at Jaccard >= 0.8)
+  - Cross-repository, cross-domain and label-conflict groups
+  - Share of test rows that also occur on the training side for every experiment layout
+  - CSV output with duplicate_key_summary.csv, duplicate_split_exposure.csv
+
+- **Checkpoint 17: Prevalence Shift** (P0.9)
+  - Prevalence per repository with a Wilson 95% interval
+  - Train/val/test prevalence and test-minus-train shift for every scenario and every Group K-Fold fold,
+    produced by the real split generator; shifts of 10 percentage points or more raise a warning
+  - CSV output with prevalence_per_repo.csv, prevalence_shift_scenarios.csv
+
+**Run only the new probes**:
+
+```Shell
+uv run python -m software_defects inspect-data --dataset defectors --checkpoints 14-18
+```
+
 **Optional arguments**:
 - `--project-root` : Project root that contains `data/raw/`. Defaults to the current working directory.
 - `--dataset` : Dataset folder name in `data/raw/` (e.g., `defectors`). Required.
 - `--nrows` : Read only the first N rows of the file. Defaults to all rows.
-- `--checkpoints` : Comma-separated list of checkpoint numbers to run (e.g., '1,3,5-7'). Runs all 14 checkpoints if not specified.
+- `--checkpoints` : Comma-separated list of checkpoint numbers to run (e.g., '1,3,5-7'). Runs all 18 checkpoints if not specified.
 
 **Artifacts**:
 - `repository_distribution.csv` - Repository-level statistics (sample count, defective count, defective percentage, domain)
@@ -225,12 +264,16 @@ The exploratory performs the following checkpoints:
 - `split_report.csv` - Repository-level split simulation for ML → non-ML and vice versa
 - `token_analysis.csv` - Token length distribution for CodeBERT (microsoft/codebert-base) and CodeT5-small (Salesforce/codet5-small)
 - `shortcut_signal_auc.csv` - AUC scores for shortcut features per split and domain
+- `path_metadata_signal_auc.csv`, `path_text_probe.csv`, `files_in_commit_prevalence.csv`, `commit_year_prevalence.csv` - Checkpoint 14
+- `repository_identity_probe.csv`, `repository_identity_recall.csv` - Checkpoint 15
+- `duplicate_key_summary.csv`, `duplicate_split_exposure.csv` - Checkpoint 16
+- `prevalence_per_repo.csv`, `prevalence_shift_scenarios.csv` - Checkpoint 17
 - `combined_run_report.json` - Combined report with metadata, warnings, and checkpoint summaries
 - `combined_run_report.md` - Markdown summary of the combined run report
 - `dataset_exploratory.txt` - Full exploratory report
 - `dataset_exploratory.json` - JSON summary
 
-The exploratory includes 14 checkpoints:
+The exploratory includes 18 checkpoints:
 - Checkpoint 1: Dataset integrity
 - Checkpoint 2: Label validity
 - Checkpoint 3: JIT input validity
@@ -244,7 +287,11 @@ The exploratory includes 14 checkpoints:
 - Checkpoint 11: Repository-level split simulation (ML ↔ non-ML)
 - Checkpoint 12: Token distribution for CodeBERT (microsoft/codebert-base) and CodeT5-small (Salesforce/codet5-small)
 - Checkpoint 13: Shortcut signal check (AUC for diff features)
-- Checkpoint 14: Run report (combined warnings and metadata)
+- Checkpoint 14: Path, files-per-commit and commit-time shortcut probe
+- Checkpoint 15: Repository identity probe
+- Checkpoint 16: Duplicate and near-duplicate diffs
+- Checkpoint 17: Prevalence shift per repository, scenario and fold
+- Checkpoint 18: Run report (combined warnings, git commit and data hashes; always runs last)
 
 ---
 

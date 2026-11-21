@@ -196,3 +196,20 @@ class TestCheckpoints:
         assert total == expected_total
         assert projected["test_ml_dl_repos"] == ML_HOLDOUT
         assert projected["test_non_ml_repos"] == NON_ML_HOLDOUT
+
+
+class TestDatasetScope:
+    """The repository counts quoted in the README, the form and the thesis (P0.11)."""
+
+    def test_repository_counts_match_the_documented_scope(self, project_root: Path) -> None:
+        domains = load_domain_sets(project_root)
+        assert len(domains["ml_dl"]) == 7
+        assert len(domains["non_ml"]) == 17
+        assert domains["ambiguous"] == set()
+        assert domains["unmapped"] == {"freqtrade"}
+        assert len(domains["ml_dl"] | domains["non_ml"]) == 24
+
+    def test_scope_document_quotes_the_same_numbers(self) -> None:
+        scope = (Path(__file__).resolve().parents[1] / "docs" / "DATASET_SCOPE.md").read_text(encoding="utf-8")
+        for expected in ("213,420", "25", "24 (7 ML/DL + 17 non-ML)", "210,156", "freqtrade"):
+            assert expected in scope
