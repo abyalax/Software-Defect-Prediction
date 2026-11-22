@@ -2,6 +2,7 @@
 __pycache__/
 *.py[oc]
 *.patch
+*.parquet
 build/
 dist/
 wheels/
@@ -17,3 +18,4 @@ data/processed/*
 
 # Artifacts
 artifacts/models/*
+artifacts/split_manifest/**/*.parquet
