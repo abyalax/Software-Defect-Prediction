@@ -1,0 +1,97 @@
+{
+  "contract": {
+    "data_sha256": {
+      "jit_random_test": "b77d63dcbb4c9a48e08fd2fe28b8d7798625df67e9d80ec86f7a9fdd1b35189d",
+      "jit_random_train": "347792c217919387323f49a7c52c6741ad0e61309f1d8c6bc30df2262a628076",
+      "jit_random_val": "5093e1ce700e1139138cbed03ed157b4bfbe9abca363924e17a45f1627756542",
+      "repository_mapping": "de2cf0ed1cf6a0797348a0c27a18858aa51a84381e95723efa341a5b8a487b62"
+    },
+    "dataset": "defectors",
+    "equalize_train_size": null,
+    "fold": 3,
+    "format_version": 1,
+    "holdout_repositories": {
+      "ml_dl": [
+        "jax",
+        "lightning"
+      ],
+      "non_ml": [
+        "airflow",
+        "ansible",
+        "black",
+        "celery"
+      ]
+    },
+    "ids_hash_definition": "sha256 over the ascending row ids written as little-endian int64",
+    "n_folds": 5,
+    "row_id_definition": "0-based position of the row in concat(jit train, jit test, jit val) of the original Defectors 'random' parquet files, i.e. the row index the pipeline holds before filtering",
+    "scenario": "Group_KFold_Non_ML",
+    "seed": 42,
+    "splits": {
+      "test": {
+        "commits": 12695,
+        "defective": 12230,
+        "ids_sha256": "773505f196d23c3d02580f5e830c19462b7b19cd21875e9b263b95f011a43568",
+        "repos": [
+          "black",
+          "cpython",
+          "django-rest-framework",
+          "openpilot",
+          "pandas",
+          "poetry",
+          "redash"
+        ],
+        "samples": 28124
+      },
+      "train": {
+        "commits": 55785,
+        "defective": 56707,
+        "ids_sha256": "0620e8b71b8a3c63f19f2749b593c4a1abee80e0cc75cd27ae4dbce80ceb8882",
+        "repos": [
+          "airflow",
+          "ansible",
+          "celery",
+          "core",
+          "django",
+          "localstack",
+          "numpy",
+          "pipenv",
+          "scrapy",
+          "sentry"
+        ],
+        "samples": 128507
+      },
+      "val": {
+        "commits": 6198,
+        "defective": 6418,
+        "ids_sha256": "5ad308a508d22cc79d85ea484f2dbbbaff796b37c02ba89456b70db22b2e43f5",
+        "repos": [
+          "airflow",
+          "ansible",
+          "celery",
+          "core",
+          "django",
+          "localstack",
+          "numpy",
+          "pipenv",
+          "scrapy",
+          "sentry"
+        ],
+        "samples": 13912
+      }
+    },
+    "val_ratio": 0.1
+  },
+  "manifest_sha256": "755605433d4e5385b50ad6b4adf9606f6260c544777efaa493fc02b3c9bba224",
+  "provenance": {
+    "created_at": "2026-11-22T09:13:37",
+    "git_dirty": true,
+    "library_versions": {
+      "numpy": "2.5.5",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "scikit-learn": "1.9.1"
+    },
+    "python": "3.13.12"
+  }
+}

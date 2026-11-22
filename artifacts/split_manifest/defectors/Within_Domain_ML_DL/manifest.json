@@ -1,0 +1,82 @@
+{
+  "contract": {
+    "data_sha256": {
+      "jit_random_test": "b77d63dcbb4c9a48e08fd2fe28b8d7798625df67e9d80ec86f7a9fdd1b35189d",
+      "jit_random_train": "347792c217919387323f49a7c52c6741ad0e61309f1d8c6bc30df2262a628076",
+      "jit_random_val": "5093e1ce700e1139138cbed03ed157b4bfbe9abca363924e17a45f1627756542",
+      "repository_mapping": "de2cf0ed1cf6a0797348a0c27a18858aa51a84381e95723efa341a5b8a487b62"
+    },
+    "dataset": "defectors",
+    "equalize_train_size": null,
+    "fold": null,
+    "format_version": 1,
+    "holdout_repositories": {
+      "ml_dl": [
+        "jax",
+        "lightning"
+      ],
+      "non_ml": [
+        "airflow",
+        "ansible",
+        "black",
+        "celery"
+      ]
+    },
+    "ids_hash_definition": "sha256 over the ascending row ids written as little-endian int64",
+    "n_folds": null,
+    "row_id_definition": "0-based position of the row in concat(jit train, jit test, jit val) of the original Defectors 'random' parquet files, i.e. the row index the pipeline holds before filtering",
+    "scenario": "Within_Domain_ML_DL",
+    "seed": 42,
+    "splits": {
+      "test": {
+        "commits": 4622,
+        "defective": 5812,
+        "ids_sha256": "05af1700d8da1861049c4d75f50ca0da6df53bae5f912d40df9ef2caf50418ec",
+        "repos": [
+          "jax",
+          "lightning"
+        ],
+        "samples": 11740
+      },
+      "train": {
+        "commits": 8213,
+        "defective": 11085,
+        "ids_sha256": "ffa8ef4719b2c694810baad9d9b4105c32800c11123f489eb6ae6dfbd4bf902e",
+        "repos": [
+          "ray",
+          "scikit-learn",
+          "spaCy",
+          "transformers",
+          "yolov5"
+        ],
+        "samples": 24766
+      },
+      "val": {
+        "commits": 912,
+        "defective": 1416,
+        "ids_sha256": "dc2de33f9bd8f398021d546c5aa8cdff9de8cc4a3ecdbf3549ca5d308ec401e8",
+        "repos": [
+          "ray",
+          "scikit-learn",
+          "spaCy",
+          "transformers",
+          "yolov5"
+        ],
+        "samples": 3107
+      }
+    },
+    "val_ratio": 0.1
+  },
+  "manifest_sha256": "cf9816a55a15e842ce4c6e93e9fa2d5ad9aaaa4fad2a86a2a9c5b737fbf6dc5a",
+  "provenance": {
+    "created_at": "2026-11-22T09:13:37",
+    "git_dirty": true,
+    "library_versions": {
+      "numpy": "2.5.5",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "scikit-learn": "1.9.1"
+    },
+    "python": "3.13.12"
+  }
+}

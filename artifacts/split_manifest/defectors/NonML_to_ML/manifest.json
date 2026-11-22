@@ -1,0 +1,111 @@
+{
+  "contract": {
+    "data_sha256": {
+      "jit_random_test": "b77d63dcbb4c9a48e08fd2fe28b8d7798625df67e9d80ec86f7a9fdd1b35189d",
+      "jit_random_train": "347792c217919387323f49a7c52c6741ad0e61309f1d8c6bc30df2262a628076",
+      "jit_random_val": "5093e1ce700e1139138cbed03ed157b4bfbe9abca363924e17a45f1627756542",
+      "repository_mapping": "de2cf0ed1cf6a0797348a0c27a18858aa51a84381e95723efa341a5b8a487b62"
+    },
+    "dataset": "defectors",
+    "equalize_train_size": null,
+    "fold": null,
+    "format_version": 1,
+    "holdout_repositories": {
+      "ml_dl": [
+        "jax",
+        "lightning"
+      ],
+      "non_ml": [
+        "airflow",
+        "ansible",
+        "black",
+        "celery"
+      ]
+    },
+    "ids_hash_definition": "sha256 over the ascending row ids written as little-endian int64",
+    "n_folds": null,
+    "row_id_definition": "0-based position of the row in concat(jit train, jit test, jit val) of the original Defectors 'random' parquet files, i.e. the row index the pipeline holds before filtering",
+    "scenario": "NonML_to_ML",
+    "seed": 42,
+    "splits": {
+      "test": {
+        "commits": 13747,
+        "defective": 18313,
+        "ids_sha256": "38f70de6b5c72892ea5b92dc0aaf94f3b36b0f085003f745dd44c9493a564ed2",
+        "repos": [
+          "jax",
+          "lightning",
+          "ray",
+          "scikit-learn",
+          "spaCy",
+          "transformers",
+          "yolov5"
+        ],
+        "samples": 39613
+      },
+      "train": {
+        "commits": 67211,
+        "defective": 67198,
+        "ids_sha256": "47cee1f21f0bbfbbae890bd3e9afa09dedd6b27a7dad1cfe650b3c2a1bdaaefa",
+        "repos": [
+          "airflow",
+          "ansible",
+          "black",
+          "celery",
+          "core",
+          "cpython",
+          "django",
+          "django-rest-framework",
+          "localstack",
+          "numpy",
+          "openpilot",
+          "pandas",
+          "pipenv",
+          "poetry",
+          "redash",
+          "scrapy",
+          "sentry"
+        ],
+        "samples": 152465
+      },
+      "val": {
+        "commits": 7467,
+        "defective": 8157,
+        "ids_sha256": "60e5a7ca93015ee034abdca9dc4bf5fe31b73f44075688d746a6acc7e79f3f2d",
+        "repos": [
+          "airflow",
+          "ansible",
+          "black",
+          "celery",
+          "core",
+          "cpython",
+          "django",
+          "django-rest-framework",
+          "localstack",
+          "numpy",
+          "openpilot",
+          "pandas",
+          "pipenv",
+          "poetry",
+          "redash",
+          "scrapy",
+          "sentry"
+        ],
+        "samples": 18078
+      }
+    },
+    "val_ratio": 0.1
+  },
+  "manifest_sha256": "dd721e534257c811c00d4b3d571c6fc2170faf11a25c7150f80c4a35a796cf44",
+  "provenance": {
+    "created_at": "2026-11-22T09:13:37",
+    "git_dirty": true,
+    "library_versions": {
+      "numpy": "2.5.5",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "scikit-learn": "1.9.1"
+    },
+    "python": "3.13.12"
+  }
+}

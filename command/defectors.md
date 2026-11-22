@@ -444,6 +444,48 @@ uv run python -m software_defects verify-tokenization --dataset defectors --scen
 - Exit code is 1 when any check fails, 0 otherwise.
 - Report: `artifacts/report/defectors/data_pipeline/TokenizationVerifier/<timestamp>/tokenization_<scenario>.{txt,json,csv}`
 
+### Split Manifest (row ids and hashes)
+
+The manifest freezes which rows are train, val and test in each scenario and fold, so every training run and every
+reported number can cite the split it used. Run it once after the final pipeline code is committed and the data is
+final. It needs the raw dataset only (not the processed data) and always uses the full dataset.
+
+```Shell
+# Save the manifests (all 7 scenarios, 15 manifests including the 5 folds of each Group K-Fold scenario)
+uv run python -m software_defects build-split-manifest --dataset defectors [--scenario <SCENARIO>] [--fold N]
+
+# Prove that nothing drifted: regenerate every split from the raw data and compare
+uv run python -m software_defects verify-split-manifest --dataset defectors [--scenario <SCENARIO>] [--fold N]
+```
+
+- `--fold` : Fold index (0-4), only together with a `Group_KFold_*` scenario. All 5 folds if omitted.
+- `--manifest-dir` : Override the output directory (default `artifacts/split_manifest/defectors`).
+- `verify-split-manifest` exits with code 1 when any check fails, 0 otherwise.
+- Reports: `artifacts/report/defectors/data_pipeline/DefectorsSplitManifest/<timestamp>/split_manifest_{build,verify}.{txt,json}`
+
+Layout (tracked in git):
+
+```
+artifacts/split_manifest/defectors/
+  index.json                      every manifest hash plus manifest_set_sha256 (one hash for the whole set)
+  ML_to_NonML/manifest.json       parameters, per-split counts and hashes, provenance
+  ML_to_NonML/row_ids.parquet     columns row_id and split (train | val | test)
+  Group_KFold_ML_DL/fold_0/...    same two files for each fold
+```
+
+- **Row id** : 0-based position of the row in `concat(jit train, jit test, jit val)` of the original `random`
+  parquet files, the row index the pipeline holds before filtering. It stays valid only for the same raw files,
+  which is why `manifest.json` stores their SHA-256 next to the SHA-256 of `repository_mapping.yaml`.
+- **Hashes** : `ids_sha256` is the SHA-256 of the ascending row ids written as little-endian int64, one per split.
+  `manifest_sha256` is the SHA-256 of the whole `contract` block (parameters, holdout, data hashes, per-split counts
+  and id hashes). `provenance` (time, git state, library versions) is stored but not hashed.
+- **Parameters** : seed 42, validation ratio 0.1 by commit, no train subsampling, the same defaults `run-pipeline` uses.
+- **Checks in `verify-split-manifest`** : the files match their own hashes, raw files and mapping are unchanged, a fresh
+  regeneration gives identical ids, no commit is shared between train/val/test, no repository is shared between
+  train and test (and val and test), and `index.json` matches the manifests on disk.
+- Building refuses a split that leaks commits or repositories, and warns when the git working tree is dirty
+  (commit first so the recorded state describes the manifest).
+
 ### Split Scenarios
 
 #### ML_to_NonML

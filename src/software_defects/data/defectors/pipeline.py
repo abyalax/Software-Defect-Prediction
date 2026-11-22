@@ -14,6 +14,7 @@ from software_defects.data.defectors.split_generator import (
     DefectorsSplitGenerator,
     SplitScenario,
 )
+from software_defects.data.defectors.split_manifest import DefectorsSplitManifest
 from software_defects.data.defectors.tokenizer import DefectorsTokenizer
 from software_defects.reporting.reporter import ReportWritter
 from software_defects.reporting.utils import get_device
@@ -111,6 +112,17 @@ class DefectorsDataPipeline:
         self._reporter.display_text(f"  Train repos: {len(split_result.train_repos)}")
         self._reporter.display_text(f"  Test repos: {len(split_result.test_repos)}")
         self._reporter.display_text()
+
+        # Step 2.5: Write split manifest (only if using full dataset)
+        if self._config.row_limit is None:
+            self._reporter.display_text("Step 2.5: Writing split manifest...")
+            manifest = DefectorsSplitManifest(config=self._config)
+            manifest_dir = manifest.write_from_split_result(split_result, scenario, fold)
+            self._reporter.display_text(f"  Manifest written to: {manifest_dir}")
+            self._reporter.display_text()
+        else:
+            self._reporter.display_text("Step 2.5: Skipping manifest (row limit is set)")
+            self._reporter.display_text()
 
         # Update summary with split information
         self._reporter.update_summary(

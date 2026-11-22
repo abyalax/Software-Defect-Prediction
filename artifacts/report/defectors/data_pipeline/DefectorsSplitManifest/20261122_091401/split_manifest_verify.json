@@ -1,0 +1,98 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects verify-split-manifest --dataset defectors",
+  "manifest_dir": "C:\\Users\\abya\\python\\software-defect\\artifacts\\split_manifest\\defectors",
+  "ok": true,
+  "index_issues": [],
+  "entries": [
+    {
+      "scenario": "ML_to_NonML",
+      "fold": null,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "NonML_to_ML",
+      "fold": null,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Repository_Level_Split",
+      "fold": null,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Within_Domain_ML_DL",
+      "fold": null,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Within_Domain_Non_ML",
+      "fold": null,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_ML_DL",
+      "fold": 0,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_ML_DL",
+      "fold": 1,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_ML_DL",
+      "fold": 2,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_ML_DL",
+      "fold": 3,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_ML_DL",
+      "fold": 4,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_Non_ML",
+      "fold": 0,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_Non_ML",
+      "fold": 1,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_Non_ML",
+      "fold": 2,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_Non_ML",
+      "fold": 3,
+      "ok": true,
+      "issues": []
+    },
+    {
+      "scenario": "Group_KFold_Non_ML",
+      "fold": 4,
+      "ok": true,
+      "issues": []
+    }
+  ]
+}

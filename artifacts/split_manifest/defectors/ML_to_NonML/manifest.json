@@ -1,0 +1,101 @@
+{
+  "contract": {
+    "data_sha256": {
+      "jit_random_test": "b77d63dcbb4c9a48e08fd2fe28b8d7798625df67e9d80ec86f7a9fdd1b35189d",
+      "jit_random_train": "347792c217919387323f49a7c52c6741ad0e61309f1d8c6bc30df2262a628076",
+      "jit_random_val": "5093e1ce700e1139138cbed03ed157b4bfbe9abca363924e17a45f1627756542",
+      "repository_mapping": "de2cf0ed1cf6a0797348a0c27a18858aa51a84381e95723efa341a5b8a487b62"
+    },
+    "dataset": "defectors",
+    "equalize_train_size": null,
+    "fold": null,
+    "format_version": 1,
+    "holdout_repositories": {
+      "ml_dl": [
+        "jax",
+        "lightning"
+      ],
+      "non_ml": [
+        "airflow",
+        "ansible",
+        "black",
+        "celery"
+      ]
+    },
+    "ids_hash_definition": "sha256 over the ascending row ids written as little-endian int64",
+    "n_folds": null,
+    "row_id_definition": "0-based position of the row in concat(jit train, jit test, jit val) of the original Defectors 'random' parquet files, i.e. the row index the pipeline holds before filtering",
+    "scenario": "ML_to_NonML",
+    "seed": 42,
+    "splits": {
+      "test": {
+        "commits": 74678,
+        "defective": 75355,
+        "ids_sha256": "bae1e09685b97452ff05d8b7043442f9edbc182a6b2bddb36418c0549595f740",
+        "repos": [
+          "airflow",
+          "ansible",
+          "black",
+          "celery",
+          "core",
+          "cpython",
+          "django",
+          "django-rest-framework",
+          "localstack",
+          "numpy",
+          "openpilot",
+          "pandas",
+          "pipenv",
+          "poetry",
+          "redash",
+          "scrapy",
+          "sentry"
+        ],
+        "samples": 170543
+      },
+      "train": {
+        "commits": 12373,
+        "defective": 16426,
+        "ids_sha256": "eb51558a68f3ef0ed8a34d176c3ec42608b542f69c317e25ba4e208e16d1c7c8",
+        "repos": [
+          "jax",
+          "lightning",
+          "ray",
+          "scikit-learn",
+          "spaCy",
+          "transformers",
+          "yolov5"
+        ],
+        "samples": 35573
+      },
+      "val": {
+        "commits": 1374,
+        "defective": 1887,
+        "ids_sha256": "737efb0186e2f957de3aa887a794dca793fe7cee9d6fe03d9d0343da67619812",
+        "repos": [
+          "jax",
+          "lightning",
+          "ray",
+          "scikit-learn",
+          "spaCy",
+          "transformers",
+          "yolov5"
+        ],
+        "samples": 4040
+      }
+    },
+    "val_ratio": 0.1
+  },
+  "manifest_sha256": "6b39b4a73d610f77c9dc0d4f5a0340e01254375d63de41511c1d65ef8a8c4f3d",
+  "provenance": {
+    "created_at": "2026-11-22T09:13:37",
+    "git_dirty": true,
+    "library_versions": {
+      "numpy": "2.5.5",
+      "pandas": "3.1.1",
+      "pyarrow": "26.0.1",
+      "scikit-learn": "1.9.1"
+    },
+    "python": "3.13.12"
+  }
+}

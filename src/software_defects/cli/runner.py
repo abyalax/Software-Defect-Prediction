@@ -167,3 +167,44 @@ class RunnerCLI:
             fold=fold,
         )
         return 1 if int(report[CHECK_COLUMNS].sum().sum()) else 0
+
+    @staticmethod
+    def run_build_split_manifest(
+        project_root: Path,
+        dataset: str,
+        scenario: str | None,
+        fold: int | None,
+        manifest_dir: Path | None,
+    ) -> int:
+        """Save the row-level split manifest (ids and hashes) of one or all scenarios."""
+        from software_defects.config import DatasetConfig
+        from software_defects.data.defectors.split_manifest import DefectorsSplitManifest
+
+        dataset_config = DatasetConfig(project_root=project_root, dataset_name=dataset)
+        manifest = DefectorsSplitManifest(config=dataset_config, manifest_dir=manifest_dir)
+        manifest.build(scenarios=RunnerCLI._manifest_scenarios(scenario), fold=fold)
+        return 0
+
+    @staticmethod
+    def run_verify_split_manifest(
+        project_root: Path,
+        dataset: str,
+        scenario: str | None,
+        fold: int | None,
+        manifest_dir: Path | None,
+    ) -> int:
+        """Verify the stored split manifests against a fresh split; returns 1 when a check fails."""
+        from software_defects.config import DatasetConfig
+        from software_defects.data.defectors.split_manifest import DefectorsSplitManifest
+
+        dataset_config = DatasetConfig(project_root=project_root, dataset_name=dataset)
+        manifest = DefectorsSplitManifest(config=dataset_config, manifest_dir=manifest_dir)
+        ok = manifest.verify(scenarios=RunnerCLI._manifest_scenarios(scenario), fold=fold)
+        return 0 if ok else 1
+
+    @staticmethod
+    def _manifest_scenarios(scenario: str | None) -> list | None:
+        """Convert the optional --scenario value into the list the manifest class expects."""
+        from software_defects.data.defectors.split_generator import SplitScenario
+
+        return [SplitScenario(scenario)] if scenario is not None else None

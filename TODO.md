@@ -26,9 +26,9 @@
 - [x] P2.2 Tujuh scenario: ML_to_NonML, NonML_to_ML, Repository_Level_Split, Within_Domain (ML/DL dan non-ML), Group_KFold (ML/DL dan non-ML, 5 fold)
 - [x] P2.3 Val per commit dari sisi train, tanpa overlap repo/commit antara train dan test
 - [x] P2.4 Test unit generator split (25 test lolos)
-- [ ] P2.5 Terapkan `remove-leave-repo-out.patch`
-- [ ] P2.6 Simpan manifest split (id baris per split per scenario dan fold) beserta hash-nya
-- [ ] P2.7 Bersihkan artefak lama (`20261117_*`, run parsial `20261120_112058`, dan laporan pipeline lama)
+- [x] P2.5 Terapkan `remove-leave-repo-out.patch` (sudah teraplikasi di commit `2bdceb5`; `split_generator.py` tidak lagi memuat scenario leave-repo-out)
+- [x] P2.6 Simpan manifest split (id baris per split per scenario dan fold) beserta hash-nya (`split_manifest.py`, perintah `build-split-manifest` dan `verify-split-manifest`; 15 manifest di `artifacts/split_manifest/defectors/`; hasil menunggu run)
+- [x] P2.7 Bersihkan artefak lama (`20261117_*`, run parsial `20261120_112058`, dan laporan pipeline lama; laporan pipeline `20261117_*` dan `20261120_*` dihapus karena belum memuat `diff_input`, yang tersisa hanya run `20261121_*`)
 
 ## P3. Model Training
 - [x] P3.1 Baseline TF-IDF + Logistic Regression di 7 scenario

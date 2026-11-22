@@ -1,0 +1,98 @@
+{
+  "dataset": "defectors",
+  "entries": [
+    {
+      "fold": null,
+      "manifest_sha256": "6b39b4a73d610f77c9dc0d4f5a0340e01254375d63de41511c1d65ef8a8c4f3d",
+      "path": "ML_to_NonML/manifest.json",
+      "scenario": "ML_to_NonML"
+    },
+    {
+      "fold": null,
+      "manifest_sha256": "dd721e534257c811c00d4b3d571c6fc2170faf11a25c7150f80c4a35a796cf44",
+      "path": "NonML_to_ML/manifest.json",
+      "scenario": "NonML_to_ML"
+    },
+    {
+      "fold": null,
+      "manifest_sha256": "e30c3ab74315a0e85c27a71667df3c5a4afc4a0972b641deee1a76b8166e314e",
+      "path": "Repository_Level_Split/manifest.json",
+      "scenario": "Repository_Level_Split"
+    },
+    {
+      "fold": null,
+      "manifest_sha256": "cf9816a55a15e842ce4c6e93e9fa2d5ad9aaaa4fad2a86a2a9c5b737fbf6dc5a",
+      "path": "Within_Domain_ML_DL/manifest.json",
+      "scenario": "Within_Domain_ML_DL"
+    },
+    {
+      "fold": null,
+      "manifest_sha256": "d0e95542d2c7594bcc5b19efd706def8e151a2d5315ba84ed30533a1f29fb57e",
+      "path": "Within_Domain_Non_ML/manifest.json",
+      "scenario": "Within_Domain_Non_ML"
+    },
+    {
+      "fold": 0,
+      "manifest_sha256": "2ff045a60a0a929cfa3b9cb23aea3ce645fffa0340d4446db1dfe0ff5e826c18",
+      "path": "Group_KFold_ML_DL/fold_0/manifest.json",
+      "scenario": "Group_KFold_ML_DL"
+    },
+    {
+      "fold": 1,
+      "manifest_sha256": "56aaa18fbd6433754ffc9e52284c88bff5564f15ce26aa1dc5967612652ac8ae",
+      "path": "Group_KFold_ML_DL/fold_1/manifest.json",
+      "scenario": "Group_KFold_ML_DL"
+    },
+    {
+      "fold": 2,
+      "manifest_sha256": "4da69ee3d31228838535ec5cd13eabbdf1a6e65ea96ce1ea653cff9388567956",
+      "path": "Group_KFold_ML_DL/fold_2/manifest.json",
+      "scenario": "Group_KFold_ML_DL"
+    },
+    {
+      "fold": 3,
+      "manifest_sha256": "ec3e1b2125bc1e52426b803d4349457aeebc316f469bdb766d4dcd7bd8ab38c1",
+      "path": "Group_KFold_ML_DL/fold_3/manifest.json",
+      "scenario": "Group_KFold_ML_DL"
+    },
+    {
+      "fold": 4,
+      "manifest_sha256": "5e95f924f55d679c2ad4a69f5b0e24875fb9b5b754b945f8364e5f43a2ccba2e",
+      "path": "Group_KFold_ML_DL/fold_4/manifest.json",
+      "scenario": "Group_KFold_ML_DL"
+    },
+    {
+      "fold": 0,
+      "manifest_sha256": "4cf4464a23ac44f7006b16fe89025882725ca9c3beca7b7cf491df1ae1fbd21c",
+      "path": "Group_KFold_Non_ML/fold_0/manifest.json",
+      "scenario": "Group_KFold_Non_ML"
+    },
+    {
+      "fold": 1,
+      "manifest_sha256": "4727ce020c75d34b410cc22cf3690ea3a9889181b72972dd4e791677258cf2cc",
+      "path": "Group_KFold_Non_ML/fold_1/manifest.json",
+      "scenario": "Group_KFold_Non_ML"
+    },
+    {
+      "fold": 2,
+      "manifest_sha256": "df50e5f94b1bf3a5af949be50e5d8252fa64ea6d4ae6722eff9f8ba409aa4d78",
+      "path": "Group_KFold_Non_ML/fold_2/manifest.json",
+      "scenario": "Group_KFold_Non_ML"
+    },
+    {
+      "fold": 3,
+      "manifest_sha256": "755605433d4e5385b50ad6b4adf9606f6260c544777efaa493fc02b3c9bba224",
+      "path": "Group_KFold_Non_ML/fold_3/manifest.json",
+      "scenario": "Group_KFold_Non_ML"
+    },
+    {
+      "fold": 4,
+      "manifest_sha256": "69a95a8a19a69133f6e2afd06b2f32db16c5e9adba8d652ae18f1aa2f60e7b19",
+      "path": "Group_KFold_Non_ML/fold_4/manifest.json",
+      "scenario": "Group_KFold_Non_ML"
+    }
+  ],
+  "format_version": 1,
+  "manifest_set_sha256": "f958a0ae6c3243c32c66e28b7fd941660d2be5d8c3974ae716f60cc3dfba7bd2",
+  "n_manifests": 15
+}

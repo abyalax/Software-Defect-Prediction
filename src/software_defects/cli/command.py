@@ -50,6 +50,20 @@ class CommandCLI:
                 arguments.input_dir,
                 arguments.fold,
             ),
+            "build-split-manifest": lambda: RunnerCLI.run_build_split_manifest(
+                project_root,
+                arguments.dataset,
+                arguments.scenario,
+                arguments.fold,
+                arguments.manifest_dir,
+            ),
+            "verify-split-manifest": lambda: RunnerCLI.run_verify_split_manifest(
+                project_root,
+                arguments.dataset,
+                arguments.scenario,
+                arguments.fold,
+                arguments.manifest_dir,
+            ),
         }
 
         try:

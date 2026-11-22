@@ -6,6 +6,17 @@ import argparse
 from pathlib import Path
 
 
+MANIFEST_SCENARIO_CHOICES = [
+    "ML_to_NonML",
+    "NonML_to_ML",
+    "Repository_Level_Split",
+    "Within_Domain_ML_DL",
+    "Within_Domain_Non_ML",
+    "Group_KFold_ML_DL",
+    "Group_KFold_Non_ML",
+]
+
+
 class ParserArgs:
     """Parser for CLI arguments."""
 
@@ -76,6 +87,42 @@ class ParserArgs:
             default=None,
             choices=range(5),
             help="Fold index (0-4) for the Group_KFold scenarios. Runs all 5 folds if not specified.",
+        )
+
+    @staticmethod
+    def _add_manifest_arguments(parser: argparse.ArgumentParser) -> None:
+        # No --nrows: a manifest only makes sense for the full dataset
+        parser.add_argument(
+            "--project-root",
+            type=Path,
+            default=Path.cwd(),
+            help="Project root containing data/raw/ and artifacts/.",
+        )
+        parser.add_argument(
+            "--dataset",
+            type=str,
+            required=True,
+            help="Dataset folder name in data/raw/ (e.g., defectors).",
+        )
+        parser.add_argument(
+            "--scenario",
+            type=str,
+            default=None,
+            choices=MANIFEST_SCENARIO_CHOICES,
+            help="Split scenario (default: all seven scenarios).",
+        )
+        parser.add_argument(
+            "--fold",
+            type=int,
+            default=None,
+            choices=range(5),
+            help="Fold index (0-4), only together with a Group_KFold scenario. All 5 folds if not specified.",
+        )
+        parser.add_argument(
+            "--manifest-dir",
+            type=Path,
+            default=None,
+            help="Directory of the manifests (default: artifacts/split_manifest/<dataset>).",
         )
 
     @staticmethod
@@ -195,5 +242,17 @@ class ParserArgs:
             choices=range(5),
             help="Fold index (0-4) for the Group_KFold scenarios. Verifies all 5 folds if not specified.",
         )
+
+        build_manifest_parser = subparsers.add_parser(
+            "build-split-manifest",
+            help="Save the row ids of train/val/test per scenario and fold, with their SHA-256 hashes.",
+        )
+        ParserArgs._add_manifest_arguments(build_manifest_parser)
+
+        verify_manifest_parser = subparsers.add_parser(
+            "verify-split-manifest",
+            help="Check the stored split manifests against a fresh regeneration from the raw data.",
+        )
+        ParserArgs._add_manifest_arguments(verify_manifest_parser)
 
         return parser

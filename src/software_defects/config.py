@@ -75,3 +75,8 @@ class DatasetConfig:
     def processed_dir(self) -> Path:
         """Directory that receives processed parquet files."""
         return self.project_root / "data" / "processed" / "defectors"
+
+    @property
+    def split_manifest_dir(self) -> Path:
+        """Directory that holds the row-level split manifests (tracked in git, unlike processed data)."""
+        return self.artifacts_dir / "split_manifest" / self.dataset_name

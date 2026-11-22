@@ -1,0 +1,26 @@
+
+------------------------------------------------------------------------------------------------------------------------
+Split manifest: build
+------------------------------------------------------------------------------------------------------------------------
+
+⚠   Working tree has uncommitted changes; commit first so the recorded commit describes this manifest
+Loading data...
+  Loaded 213,420 records
+
+  ML_to_NonML                      train=  35,573 val=  4,040 test=170,543  sha256=6b39b4a73d610f77
+  NonML_to_ML                      train= 152,465 val= 18,078 test= 39,613  sha256=dd721e534257c811
+  Repository_Level_Split           train= 128,791 val= 14,070 test= 67,295  sha256=e30c3ab74315a0e8
+  Within_Domain_ML_DL              train=  24,766 val=  3,107 test= 11,740  sha256=cf9816a55a15e842
+  Within_Domain_Non_ML             train= 103,008 val= 11,980 test= 55,555  sha256=d0e95542d2c7594b
+  Group_KFold_ML_DL fold 0         train=  19,839 val=  2,283 test= 17,491  sha256=2ff045a60a0a929c
+  Group_KFold_ML_DL fold 1         train=  25,672 val=  2,927 test= 11,014  sha256=56aaa18fbd643375
+  Group_KFold_ML_DL fold 2         train=  31,434 val=  3,213 test=  4,966  sha256=4da69ee3d3122883
+  Group_KFold_ML_DL fold 3         train=  32,915 val=  3,525 test=  3,173  sha256=ec3e1b2125bc1e52
+  Group_KFold_ML_DL fold 4         train=  32,856 val=  3,788 test=  2,969  sha256=5e95f924f55d679c
+  Group_KFold_Non_ML fold 0        train= 115,317 val= 13,603 test= 41,623  sha256=4cf4464a23ac44f7
+  Group_KFold_Non_ML fold 1        train= 120,442 val= 13,108 test= 36,993  sha256=4727ce020c75d34b
+  Group_KFold_Non_ML fold 2        train= 121,711 val= 12,921 test= 35,911  sha256=df50e5f94b1bf3a5
+  Group_KFold_Non_ML fold 3        train= 128,507 val= 13,912 test= 28,124  sha256=755605433d4e5385
+  Group_KFold_Non_ML fold 4        train= 128,157 val= 14,494 test= 27,892  sha256=69a95a8a19a69133
+
+Manifests written: 15 (manifest set sha256: f958a0ae6c3243c32c66e28b7fd941660d2be5d8c3974ae716f60cc3dfba7bd2)
