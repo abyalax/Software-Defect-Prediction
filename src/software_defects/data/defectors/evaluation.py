@@ -54,12 +54,11 @@ class DefectEvaluator:
         prevalence = float(np.mean(y_true))
 
         # Calculate prevalence baseline PR-AUC (random classifier)
-        prevalence_baseline_pr_auc = prevalence
+        # Undefined when only one class is present
+        prevalence_baseline_pr_auc = prevalence if len(np.unique(y_true)) > 1 else float("nan")
 
-        # Calculate PR-AUC
-        pr_auc = float(average_precision_score(y_true, y_scores))
-
-        # ROC-AUC is undefined when only one class is present
+        # PR-AUC and ROC-AUC are undefined when only one class is present
+        pr_auc = float(average_precision_score(y_true, y_scores)) if len(np.unique(y_true)) > 1 else float("nan")
         roc_auc = float(roc_auc_score(y_true, y_scores)) if len(np.unique(y_true)) > 1 else float("nan")
 
         # Select threshold if not provided

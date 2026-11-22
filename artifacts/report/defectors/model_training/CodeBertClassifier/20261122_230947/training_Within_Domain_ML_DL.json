@@ -1,0 +1,37 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects train --dataset defectors --scenario Within_Domain_ML_DL --model codebert --seeds 42 --epochs 1 --max-train-samples 64 --max-val-samples 32 --batch-size 4 --grad-accum 2",
+  "device": "cuda",
+  "scenario": "Within_Domain_ML_DL",
+  "model": "codebert",
+  "seeds": [
+    42
+  ],
+  "training_config": {
+    "learning_rate": 2e-05,
+    "weight_decay": 0.01,
+    "epochs": 1,
+    "batch_size": 4,
+    "gradient_accumulation_steps": 2,
+    "warmup_ratio": 0.1,
+    "max_grad_norm": 1.0,
+    "max_length": 512,
+    "length_bucketing": true,
+    "bucket_pool_factor": 50,
+    "class_weight": "balanced",
+    "precision": "auto",
+    "seed": 42,
+    "max_train_samples": 64,
+    "max_val_samples": 32,
+    "eval_batch_size": 32,
+    "log_every": 50
+  },
+  "classifier_config": {
+    "pretrained_name": "microsoft/codebert-base",
+    "head_dropout": 0.1,
+    "num_labels": 2,
+    "gradient_checkpointing": false,
+    "cache_dir": "C:\\Users\\abya\\python\\software-defect\\data\\models\\cache"
+  },
+  "n_runs": 1,
+  "results_path": "C:\\Users\\abya\\python\\software-defect\\artifacts\\report\\defectors\\model_training\\CodeBertClassifier\\20261122_230947\\training_results.csv"
+}

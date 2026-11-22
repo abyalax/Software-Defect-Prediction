@@ -80,7 +80,7 @@ class LabelValidity:
                 if len(defective_df) > 0:
                     line_counts = defective_df["lines"].apply(len)
                     self._reporter.display_text(f"  {split_name} (n={len(defective_df):,}):")
-                    self._reporter.display_text(f"    Number of lines per defective row:")
+                    self._reporter.display_text("    Number of lines per defective row:")
                     self._reporter.display_text(f"      Mean: {line_counts.mean():.2f}")
                     self._reporter.display_text(f"      Median: {line_counts.median():.2f}")
                     self._reporter.display_text(f"      Min: {line_counts.min()}")

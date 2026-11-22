@@ -1,0 +1,23 @@
+
+--------------------------------------------------------------------------------------------
+CodeT5SmallClassifier benchmark
+--------------------------------------------------------------------------------------------
+Device: cuda | seq_len=512 | steps=5
+  batch 1: 9.9 train samples/s, 42.5 infer samples/s, peak VRAM 1275.1 MiB
+  batch 2: 12.9 train samples/s, 43.4 infer samples/s, peak VRAM 1750.7 MiB
+  batch 4: 15.3 train samples/s, 46.8 infer samples/s, peak VRAM 2701.9 MiB
+  batch 8: 17.1 train samples/s, 48.6 infer samples/s, peak VRAM 4604.2 MiB
+  batch 16: 2.6 train samples/s, 47.8 infer samples/s, peak VRAM 8408.8 MiB
+
+Estimated hours for the 35 runs of codet5 (3 epochs):
+┌───┬────────────────────────┬──────┬───────────────┬─────────────┬────────────────────┐
+│   │ scenario               │ runs │ train_samples │ val_samples │ hours              │
+├───┼────────────────────────┼──────┼───────────────┼─────────────┼────────────────────┤
+│ 0 │ ML_to_NonML            │ 3    │ 35573         │ 4040        │ 5.393803568325198  │
+│ 1 │ NonML_to_ML            │ 3    │ 152465        │ 18078       │ 23.156935891639307 │
+│ 2 │ Repository_Level_Split │ 3    │ 128791        │ 14070       │ 19.499473566464022 │
+│ 3 │ Within_Domain_ML_DL    │ 3    │ 24766         │ 3107        │ 3.7703171391746126 │
+│ 4 │ Within_Domain_Non_ML   │ 3    │ 103008        │ 11980       │ 15.633201873446305 │
+│ 5 │ Group_KFold_ML_DL      │ 10   │ 28543         │ 3147        │ 14.410014470471182 │
+│ 6 │ Group_KFold_Non_ML     │ 10   │ 122827        │ 13608       │ 62.02083110530718  │
+└───┴────────────────────────┴──────┴───────────────┴─────────────┴────────────────────┘

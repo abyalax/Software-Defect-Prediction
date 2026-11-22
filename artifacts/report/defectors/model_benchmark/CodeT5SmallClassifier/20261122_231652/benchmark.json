@@ -1,0 +1,10 @@
+{
+  "command": "C:\\Users\\abya\\python\\software-defect\\.venv\\Scripts\\python.exe -m software_defects benchmark-model --dataset defectors --model codet5 --batch-sizes 1,2,4,8,16",
+  "device": "cuda",
+  "model": "codet5",
+  "seq_len": 512,
+  "precision": "auto",
+  "gradient_checkpointing": false,
+  "max_batch_size": 16,
+  "total_hours": 143.8845776148278
+}

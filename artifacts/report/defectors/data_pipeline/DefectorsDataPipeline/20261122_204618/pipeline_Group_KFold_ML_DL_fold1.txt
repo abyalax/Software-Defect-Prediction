@@ -1,0 +1,39 @@
+
+-------------------------------------------------------------------------------------
+Defectors Data Pipeline
+-------------------------------------------------------------------------------------
+
+Device: cuda
+
+Step 1: Loading data...
+  Loaded 213,420 records
+
+Step 2: Generating split (Group_KFold_ML_DL, fold 1)...
+  Train: 25,672 samples (45.83% defective)
+  Test: 11,014 samples (48.75% defective)
+  Train repos: 6
+  Test repos: 1
+
+Step 2.5: Writing split manifest...
+  Manifest written to: C:\Users\abya\python\software-defect\artifacts\split_manifest\defectors\Group_KFold_ML_DL\fold_1
+
+Step 4: Building 'path + diff' inputs and tokenizing (max_length=512)...
+  Tokenizing with codebert (microsoft/codebert-base)...
+    Train - mean tokens: 369.39, truncated: 44.34%, pre-cut: 1.16%, changed lines kept: 28.95%, fallback: 3
+    Val   - mean tokens: 361.73, truncated: 42.88%, pre-cut: 1.30%, changed lines kept: 39.73%, fallback: 1
+    Test  - mean tokens: 345.59, truncated: 34.54%, pre-cut: 0.33%, changed lines kept: 54.26%, fallback: 0
+  Tokenizing with codet5 (Salesforce/codet5-small)...
+    Train - mean tokens: 322.36, truncated: 32.77%, pre-cut: 1.16%, changed lines kept: 33.72%, fallback: 0
+    Val   - mean tokens: 313.69, truncated: 31.64%, pre-cut: 1.30%, changed lines kept: 46.84%, fallback: 0
+    Test  - mean tokens: 296.71, truncated: 23.82%, pre-cut: 0.33%, changed lines kept: 60.87%, fallback: 0
+
+Step 5: Saving processed data...
+  Saved raw train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\Group_KFold_ML_DL_train.parquet
+  Saved raw val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\Group_KFold_ML_DL_val.parquet
+  Saved raw test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\Group_KFold_ML_DL_test.parquet
+  Saved codebert train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\codebert\Group_KFold_ML_DL_train.parquet
+  Saved codebert val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\codebert\Group_KFold_ML_DL_val.parquet
+  Saved codebert test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\codebert\Group_KFold_ML_DL_test.parquet
+  Saved codet5 train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\codet5\Group_KFold_ML_DL_train.parquet
+  Saved codet5 val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\codet5\Group_KFold_ML_DL_val.parquet
+  Saved codet5 test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Group_KFold_ML_DL\fold_1\codet5\Group_KFold_ML_DL_test.parquet

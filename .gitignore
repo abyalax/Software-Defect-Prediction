@@ -16,6 +16,8 @@ active/
 data/raw/defectors/*
 data/processed/*
 
+data/models/*
+
 # Artifacts
-artifacts/models/*
+artifacts/model/*
 artifacts/split_manifest/**/*.parquet

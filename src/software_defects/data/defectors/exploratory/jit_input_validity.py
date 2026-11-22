@@ -38,7 +38,7 @@ class JitInputValidity:
 
             # Check content length
             content_lengths = df["content"].apply(lambda x: len(str(x)) if x is not None else 0)
-            self._reporter.display_text(f"    Content length stats:")
+            self._reporter.display_text("    Content length stats:")
             self._reporter.display_text(f"      Mean: {content_lengths.mean():.2f}")
             self._reporter.display_text(f"      Median: {content_lengths.median():.2f}")
             self._reporter.display_text(f"      P90: {content_lengths.quantile(0.90):.2f}")
@@ -57,7 +57,7 @@ class JitInputValidity:
 
         jit_train["num_hunks"] = jit_train["content"].apply(lambda x: count_hunks(str(x)) if x is not None else 0)
 
-        self._reporter.display_text(f"  Hunks per diff:")
+        self._reporter.display_text("  Hunks per diff:")
         self._reporter.display_text(f"    Mean: {jit_train['num_hunks'].mean():.2f}")
         self._reporter.display_text(f"    Median: {jit_train['num_hunks'].median():.2f}")
         self._reporter.display_text(f"    Max: {jit_train['num_hunks'].max()}")

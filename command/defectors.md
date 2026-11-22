@@ -559,7 +559,7 @@ uv run python -m software_defects run-baseline --dataset defectors --scenario <S
 
 **Optional arguments**:
 - `--project-root` : Project root that contains `data/raw/`. Defaults to the current working directory.
-- `--input-dir` : Directory containing processed parquet files from pipeline. If not specified, defaults to `data/processed/defectors`.
+- `--input-dir` : Directory containing processed parquet files from pipeline. If not specified, defaults to `data/processed/split/defectors`.
 - `--model` : `tfidf` (default) or `length` (diff-size features only).
 - `--seeds` : Comma-separated random seeds for multiple runs (default: `42`). Example: `42,43,44`.
 - `--equalize-train-size` : Subsample the training set to this many rows for size comparisons.
@@ -571,10 +571,10 @@ The baseline command requires that the data pipeline has been run first to gener
 
 ```Shell
 # Step 1: Run the pipeline to generate processed data
-uv run python -m software_defects run-pipeline --dataset defectors --scenario Within_Domain_ML_DL --output-dir data/processed/defectors
+uv run python -m software_defects run-pipeline --dataset defectors --scenario Within_Domain_ML_DL --output-dir data/processed/split/defectors
 
 # Step 2: Run the baseline on the processed data
-uv run python -m software_defects run-baseline --dataset defectors --scenario Within_Domain_ML_DL --input-dir data/processed/defectors
+uv run python -m software_defects run-baseline --dataset defectors --scenario Within_Domain_ML_DL --input-dir data/processed/split/defectors
 ```
 
 If the processed parquet files are not found, the baseline will fail with an error message instructing you to run the pipeline first.
@@ -671,8 +671,59 @@ For `Group_KFold_ML_DL` and `Group_KFold_Non_ML` scenarios:
 
 If the processed parquet files are not found, the baseline will display an error message like:
 ```
-Processed train file not found: data/processed/defectors/Within_Domain_ML_DL/Within_Domain_ML_DL_train.parquet
-Please run the data pipeline first: uv run python -m software_defects run-pipeline --dataset defectors --scenario Within_Domain_ML_DL --output-dir data/processed/defectors
+Processed train file not found: data/processed/split/defectors/Within_Domain_ML_DL/Within_Domain_ML_DL_train.parquet
+Please run the data pipeline first: uv run python -m software_defects run-pipeline --dataset defectors --scenario Within_Domain_ML_DL --output-dir data/processed/split/defectors
 ```
 
 ---
+## Model Training Commands (P3)
+
+Split parquet files live in `data/processed/split/defectors/<scenario>[/fold_<n>]/` (git-ignored). The Transformer
+models read the tokenized files of the pipeline (`.../<scenario>/codebert/` and `.../<scenario>/codet5/`), so run
+`run-pipeline` with tokenization first.
+
+### 4. Fine-tune CodeBERT or CodeT5-small
+
+```Shell
+uv run python -m software_defects train --dataset defectors --scenario <SCENARIO> --model <codebert|codet5> [OPTIONS]
+```
+
+Only train and validation data are used; the best epoch is chosen by validation PR-AUC and the test split is not
+touched (it is evaluated after the hyperparameters are frozen).
+
+Options:
+- `--seeds` : default `42,43,44` (non-fold scenarios) or `42,43` per fold (Group K-Fold), so 35 runs per model.
+- `--fold` : one fold of a Group K-Fold scenario; all 5 folds when omitted.
+- `--epochs 3 --batch-size 8 --grad-accum 4 --learning-rate 2e-5 --weight-decay 0.01 --warmup-ratio 0.1`
+- `--precision auto|bf16|fp16|fp32` : `auto` uses bf16 on a GPU that supports it (T5 overflows in fp16) and fp32 on CPU.
+- `--class-weight balanced|none` : weights computed from the training labels only.
+- `--gradient-checkpointing` : less VRAM at 512 tokens, slower.
+- `--no-length-bucketing` : pad to the longest sample of a random batch instead of bucketing by length.
+- `--resume` : continue an interrupted run from its `*_last.pt` checkpoint.
+- `--max-train-samples N --max-val-samples N` : smoke test on a few rows.
+
+Smoke test (small and fast):
+
+```Shell
+uv run python -m software_defects train --dataset defectors --scenario Within_Domain_ML_DL --model codebert \
+  --seeds 42 --epochs 1 --max-train-samples 64 --max-val-samples 32 --batch-size 4 --grad-accum 2
+```
+
+Outputs:
+- `artifacts/model/defectors/<model>_<scenario>[_fold<n>]_seed<s>_best.pt` : weights of the best epoch.
+- `artifacts/model/defectors/<model>_<scenario>[_fold<n>]_seed<s>_last.pt` : full state for `--resume`.
+- `artifacts/report/defectors/model_training/<Class>/<timestamp>/training_results.csv` : per run best epoch,
+  validation PR-AUC, train seconds, samples/s, peak VRAM, parameter count, precision.
+- `artifacts/report/defectors/model_training/run_registry.jsonl` : one line per run with git commit, seed, full
+  configuration and the train/val loss history (tracked in git).
+
+### 5. Benchmark a model on the local GPU
+
+```Shell
+uv run python -m software_defects benchmark-model --dataset defectors --model codebert --batch-sizes 1,2,4,8,16
+uv run python -m software_defects benchmark-model --dataset defectors --model codet5 --gradient-checkpointing
+```
+
+Runs full-length (512 token) training and inference steps for ascending batch sizes until the first out-of-memory,
+reports throughput and peak VRAM, and projects the hours of all 35 runs of the model from the train sizes in the split
+manifests (`run_time_estimate.csv`). Numbers measured on a CPU are not RTX 3050 numbers; run it on the GPU machine.

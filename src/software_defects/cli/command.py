@@ -64,6 +64,8 @@ class CommandCLI:
                 arguments.fold,
                 arguments.manifest_dir,
             ),
+            "train": lambda: RunnerCLI.run_train(project_root, arguments),
+            "benchmark-model": lambda: RunnerCLI.run_benchmark_model(project_root, arguments),
         }
 
         try:

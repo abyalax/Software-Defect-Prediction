@@ -1,0 +1,13 @@
+
+-------------------------------------------------------------------------------
+CodeBertClassifier training (Within_Domain_ML_DL)
+-------------------------------------------------------------------------------
+Device: cuda
+Training config: {'learning_rate': 2e-05, 'weight_decay': 0.01, 'epochs': 1, 'batch_size': 4, 'gradient_accumulation_steps': 2, 'warmup_ratio': 0.1, 'max_grad_norm': 1.0, 'max_length': 512, 'length_bucketing': True, 'bucket_pool_factor': 50, 'class_weight': 'balanced', 'precision': 'auto', 'seed': 42, 'max_train_samples': 64, 'max_val_samples': 32, 'eval_batch_size': 32, 'log_every': 50}
+
+Loaded train: 24,766 rows from C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_ML_DL\codebert\Within_Domain_ML_DL_train.parquet
+Loaded val: 3,107 rows from C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_ML_DL\codebert\Within_Domain_ML_DL_val.parquet
+
+Run codebert_Within_Domain_ML_DL_seed42: train=64 val=32 effective batch=8 precision=bf16
+  epoch 1/1: train_loss=0.5493 val_loss=0.3039 val_PR-AUC=1.0000 val_ROC-AUC=nan (3.6s)
+  best epoch 1: val PR-AUC=1.0000 | 7.6s, 19.6 samples/s, peak VRAM=2973 MiB

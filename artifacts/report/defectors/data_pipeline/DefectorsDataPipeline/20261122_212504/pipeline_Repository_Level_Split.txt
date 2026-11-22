@@ -1,0 +1,39 @@
+
+-------------------------------------------------------------------------------
+Defectors Data Pipeline
+-------------------------------------------------------------------------------
+
+Device: cuda
+
+Step 1: Loading data...
+  Loaded 213,420 records
+
+Step 2: Generating split (Repository_Level_Split)...
+  Train: 128,791 samples (47.08% defective)
+  Test: 67,295 samples (39.91% defective)
+  Train repos: 18
+  Test repos: 6
+
+Step 2.5: Writing split manifest...
+  Manifest written to: C:\Users\abya\python\software-defect\artifacts\split_manifest\defectors\Repository_Level_Split
+
+Step 4: Building 'path + diff' inputs and tokenizing (max_length=512)...
+  Tokenizing with codebert (microsoft/codebert-base)...
+    Train - mean tokens: 354.15, truncated: 38.76%, pre-cut: 0.82%, changed lines kept: 40.55%, fallback: 12
+    Val   - mean tokens: 348.57, truncated: 37.83%, pre-cut: 0.70%, changed lines kept: 43.25%, fallback: 1
+    Test  - mean tokens: 344.17, truncated: 36.76%, pre-cut: 0.97%, changed lines kept: 40.01%, fallback: 2
+  Tokenizing with codet5 (Salesforce/codet5-small)...
+    Train - mean tokens: 300.65, truncated: 26.96%, pre-cut: 0.82%, changed lines kept: 46.95%, fallback: 0
+    Val   - mean tokens: 295.31, truncated: 25.96%, pre-cut: 0.70%, changed lines kept: 49.95%, fallback: 0
+    Test  - mean tokens: 292.94, truncated: 26.17%, pre-cut: 0.97%, changed lines kept: 45.55%, fallback: 0
+
+Step 5: Saving processed data...
+  Saved raw train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\Repository_Level_Split_train.parquet
+  Saved raw val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\Repository_Level_Split_val.parquet
+  Saved raw test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\Repository_Level_Split_test.parquet
+  Saved codebert train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\codebert\Repository_Level_Split_train.parquet
+  Saved codebert val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\codebert\Repository_Level_Split_val.parquet
+  Saved codebert test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\codebert\Repository_Level_Split_test.parquet
+  Saved codet5 train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\codet5\Repository_Level_Split_train.parquet
+  Saved codet5 val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\codet5\Repository_Level_Split_val.parquet
+  Saved codet5 test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Repository_Level_Split\codet5\Repository_Level_Split_test.parquet

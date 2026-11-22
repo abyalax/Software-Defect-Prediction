@@ -88,7 +88,9 @@ class DefectorsTokenizer:
             Loaded tokenizer instance.
         """
         if self._tokenizer is None:
-            self._tokenizer = AutoTokenizer.from_pretrained(self._model_name, local_files_only=True)
+            self._tokenizer = AutoTokenizer.from_pretrained(
+                self._model_name, cache_dir=self._config.model_cache_dir, local_files_only=True, use_safetensors=False
+            )
         return self._tokenizer
 
     def tokenize_batch(

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 
@@ -201,6 +202,79 @@ class RunnerCLI:
         manifest = DefectorsSplitManifest(config=dataset_config, manifest_dir=manifest_dir)
         ok = manifest.verify(scenarios=RunnerCLI._manifest_scenarios(scenario), fold=fold)
         return 0 if ok else 1
+
+    @staticmethod
+    def run_train(project_root: Path, arguments: argparse.Namespace) -> int:
+        """Fine-tune a Transformer classifier on the train/val split of one scenario."""
+        from software_defects.config import DatasetConfig
+        from software_defects.data.defectors.split_generator import SplitScenario
+        from software_defects.models.classifier_config import ClassifierConfig, TrainingConfig
+        from software_defects.models.training_experiment import TRAINABLE_MODELS, TrainingExperiment
+
+        dataset_config = DatasetConfig(
+            project_root=project_root,
+            dataset_name=arguments.dataset,
+            tokenizer_max_length=arguments.max_length,
+        )
+        training_config = TrainingConfig(
+            learning_rate=arguments.learning_rate,
+            weight_decay=arguments.weight_decay,
+            epochs=arguments.epochs,
+            batch_size=arguments.batch_size,
+            gradient_accumulation_steps=arguments.grad_accum,
+            warmup_ratio=arguments.warmup_ratio,
+            max_length=arguments.max_length,
+            length_bucketing=not arguments.no_length_bucketing,
+            class_weight=arguments.class_weight,
+            precision=arguments.precision,
+            max_train_samples=arguments.max_train_samples,
+            max_val_samples=arguments.max_val_samples,
+        )
+        classifier_config = ClassifierConfig(
+            pretrained_name=TRAINABLE_MODELS[arguments.model][1],
+            gradient_checkpointing=arguments.gradient_checkpointing,
+            cache_dir=str(dataset_config.model_cache_dir),
+        )
+        seeds = [int(seed) for seed in arguments.seeds.split(",")] if arguments.seeds else None
+
+        experiment = TrainingExperiment(
+            config=dataset_config,
+            model_key=arguments.model,
+            input_dir=arguments.input_dir or dataset_config.processed_dir,
+            training_config=training_config,
+            classifier_config=classifier_config,
+            checkpoint_dir=arguments.checkpoint_dir,
+        )
+        experiment.run(
+            scenario=SplitScenario(arguments.scenario),
+            seeds=seeds,
+            fold=arguments.fold,
+            resume=arguments.resume,
+        )
+        return 0
+
+    @staticmethod
+    def run_benchmark_model(project_root: Path, arguments: argparse.Namespace) -> int:
+        """Benchmark one Transformer classifier at full length and print the run-time estimate."""
+        from software_defects.config import DatasetConfig
+        from software_defects.models.classifier_config import ClassifierConfig, TrainingConfig
+        from software_defects.models.model_benchmark import ModelBenchmark
+        from software_defects.models.training_experiment import TRAINABLE_MODELS
+
+        dataset_config = DatasetConfig(project_root=project_root, dataset_name=arguments.dataset)
+        benchmark = ModelBenchmark(
+            dataset_config,
+            arguments.model,
+            training_config=TrainingConfig(precision=arguments.precision, max_length=arguments.seq_len),
+            classifier_config=ClassifierConfig(
+                pretrained_name=TRAINABLE_MODELS[arguments.model][1],
+                gradient_checkpointing=arguments.gradient_checkpointing,
+                cache_dir=str(dataset_config.model_cache_dir),
+            ),
+        )
+        batch_sizes = [int(size) for size in arguments.batch_sizes.split(",")]
+        benchmark.run(batch_sizes, arguments.seq_len, arguments.steps, arguments.epochs)
+        return 0
 
     @staticmethod
     def _manifest_scenarios(scenario: str | None) -> list | None:

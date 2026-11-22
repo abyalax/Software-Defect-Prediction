@@ -1,0 +1,39 @@
+
+------------------------------------------------------------------------------------------------------------------------
+Defectors Data Pipeline
+------------------------------------------------------------------------------------------------------------------------
+
+Device: cuda
+
+Step 1: Loading data...
+  Loaded 213,420 records
+
+Step 2: Generating split (ML_to_NonML)...
+  Train: 35,573 samples (46.18% defective)
+  Test: 170,543 samples (44.19% defective)
+  Train repos: 7
+  Test repos: 17
+
+Step 2.5: Writing split manifest...
+  Manifest written to: C:\Users\abya\python\software-defect\artifacts\split_manifest\defectors\ML_to_NonML
+
+Step 4: Building 'path + diff' inputs and tokenizing (max_length=512)...
+  Tokenizing with codebert (microsoft/codebert-base)...
+    Train - mean tokens: 361.32, truncated: 41.26%, pre-cut: 0.94%, changed lines kept: 32.44%, fallback: 4
+    Val   - mean tokens: 370.03, truncated: 43.64%, pre-cut: 0.94%, changed lines kept: 44.82%, fallback: 0
+    Test  - mean tokens: 347.88, truncated: 37.26%, pre-cut: 0.84%, changed lines kept: 42.73%, fallback: 11
+  Tokenizing with codet5 (Salesforce/codet5-small)...
+    Train - mean tokens: 313.69, truncated: 30.06%, pre-cut: 0.94%, changed lines kept: 37.47%, fallback: 0
+    Val   - mean tokens: 322.54, truncated: 31.41%, pre-cut: 0.94%, changed lines kept: 51.98%, fallback: 0
+    Test  - mean tokens: 293.93, truncated: 25.82%, pre-cut: 0.84%, changed lines kept: 49.17%, fallback: 0
+
+Step 5: Saving processed data...
+  Saved raw train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\ML_to_NonML_train.parquet
+  Saved raw val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\ML_to_NonML_val.parquet
+  Saved raw test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\ML_to_NonML_test.parquet
+  Saved codebert train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\codebert\ML_to_NonML_train.parquet
+  Saved codebert val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\codebert\ML_to_NonML_val.parquet
+  Saved codebert test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\codebert\ML_to_NonML_test.parquet
+  Saved codet5 train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\codet5\ML_to_NonML_train.parquet
+  Saved codet5 val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\codet5\ML_to_NonML_val.parquet
+  Saved codet5 test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\ML_to_NonML\codet5\ML_to_NonML_test.parquet

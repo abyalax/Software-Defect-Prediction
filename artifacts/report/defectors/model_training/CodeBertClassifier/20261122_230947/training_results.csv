@@ -1,0 +1,2 @@
+scenario,model,fold,seed,n_train,n_val,best_epoch,epochs_run,best_val_pr_auc,train_seconds,throughput_samples_per_second,peak_vram_mib,n_parameters,precision,effective_batch_size,best_checkpoint
+Within_Domain_ML_DL,codebert,0,42,64,32,1,1,1.0,7.609207300003618,19.58773150591779,2973.33251953125,124647170,bf16,8,C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Within_Domain_ML_DL_seed42_best.pt

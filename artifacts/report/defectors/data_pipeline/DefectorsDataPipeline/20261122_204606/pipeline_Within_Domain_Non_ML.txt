@@ -1,0 +1,39 @@
+
+---------------------------------------------------------------------------------------------
+Defectors Data Pipeline
+---------------------------------------------------------------------------------------------
+
+Device: cuda
+
+Step 1: Loading data...
+  Loaded 213,420 records
+
+Step 2: Generating split (Within_Domain_Non_ML)...
+  Train: 103,008 samples (47.15% defective)
+  Test: 55,555 samples (37.88% defective)
+  Train repos: 13
+  Test repos: 4
+
+Step 2.5: Writing split manifest...
+  Manifest written to: C:\Users\abya\python\software-defect\artifacts\split_manifest\defectors\Within_Domain_Non_ML
+
+Step 4: Building 'path + diff' inputs and tokenizing (max_length=512)...
+  Tokenizing with codebert (microsoft/codebert-base)...
+    Train - mean tokens: 349.96, truncated: 37.41%, pre-cut: 0.71%, changed lines kept: 45.35%, fallback: 9
+    Val   - mean tokens: 350.69, truncated: 36.92%, pre-cut: 0.82%, changed lines kept: 43.86%, fallback: 0
+    Test  - mean tokens: 343.42, truncated: 37.05%, pre-cut: 1.09%, changed lines kept: 38.29%, fallback: 2
+  Tokenizing with codet5 (Salesforce/codet5-small)...
+    Train - mean tokens: 295.24, truncated: 25.61%, pre-cut: 0.71%, changed lines kept: 52.36%, fallback: 0
+    Val   - mean tokens: 294.62, truncated: 24.82%, pre-cut: 0.82%, changed lines kept: 50.66%, fallback: 0
+    Test  - mean tokens: 291.35, truncated: 26.41%, pre-cut: 1.09%, changed lines kept: 43.75%, fallback: 0
+
+Step 5: Saving processed data...
+  Saved raw train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\Within_Domain_Non_ML_train.parquet
+  Saved raw val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\Within_Domain_Non_ML_val.parquet
+  Saved raw test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\Within_Domain_Non_ML_test.parquet
+  Saved codebert train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\codebert\Within_Domain_Non_ML_train.parquet
+  Saved codebert val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\codebert\Within_Domain_Non_ML_val.parquet
+  Saved codebert test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\codebert\Within_Domain_Non_ML_test.parquet
+  Saved codet5 train to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\codet5\Within_Domain_Non_ML_train.parquet
+  Saved codet5 val to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\codet5\Within_Domain_Non_ML_val.parquet
+  Saved codet5 test to: C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_Non_ML\codet5\Within_Domain_Non_ML_test.parquet

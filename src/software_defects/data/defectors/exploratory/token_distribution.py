@@ -1,5 +1,7 @@
 """Checkpoint 12: Token distribution analysis with the real model tokenizers."""
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from transformers import AutoTokenizer
@@ -15,11 +17,11 @@ TOKENIZER_MODELS = {
 }
 
 
-def _download_tokenizers() -> None:
+def _download_tokenizers(cache_dir: Path | None = None) -> None:
     """Pre-download tokenizers to avoid download errors during analysis."""
     for _, hf_name in TOKENIZER_MODELS.items():
         try:
-            AutoTokenizer.from_pretrained(hf_name, local_files_only=True)
+            AutoTokenizer.from_pretrained(hf_name, cache_dir=cache_dir, local_files_only=True, use_safetensors=False)
         except Exception:
             pass  # Will be handled during actual analysis
 
@@ -27,9 +29,10 @@ def _download_tokenizers() -> None:
 class TokenDistribution:
     """Checkpoint 12: Token distribution analysis with the real model tokenizers."""
 
-    def __init__(self, loader: DefectorsDatasetLoader, reporter: ReportWritter) -> None:
+    def __init__(self, loader: DefectorsDatasetLoader, reporter: ReportWritter, cache_dir: Path | None = None) -> None:
         self._loader = loader
         self._reporter = reporter
+        self._cache_dir = cache_dir
 
     @staticmethod
     def _count_tokens(tokenizer: AutoTokenizer, texts: list[str]) -> np.ndarray:
@@ -60,7 +63,12 @@ class TokenDistribution:
         summary: dict = {}
         for model_label, hf_name in TOKENIZER_MODELS.items():
             try:
-                tokenizer = AutoTokenizer.from_pretrained(hf_name, local_files_only=True)
+                tokenizer = AutoTokenizer.from_pretrained(
+                    hf_name, 
+                    cache_dir=self._cache_dir, 
+                    local_files_only=True, 
+                    use_safetensors=False
+                )
             except Exception as exc:  # noqa: BLE001 - offline or missing model must not stop the run
                 self._reporter.display_warning(f"  Could not load tokenizer {hf_name}: {exc}")
                 continue

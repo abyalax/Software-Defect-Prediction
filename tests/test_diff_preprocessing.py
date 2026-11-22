@@ -215,7 +215,7 @@ def tokenized_pipeline(
     config: DatasetConfig, project_root: Path, synthetic_jit: pd.DataFrame, monkeypatch, roberta_like_tokenizer
 ):
     """Run the pipeline with the offline tokenizer for both models and a tight limit so truncation happens."""
-    monkeypatch.setattr(AutoTokenizer, "from_pretrained", lambda *args, **kwargs: roberta_like_tokenizer)
+    monkeypatch.setattr(AutoTokenizer, "from_pretrained", lambda *args, **kwargs: roberta_like_tokenizer, )
     config = replace(config, tokenizer_max_length=96)
     write_raw_jit(project_root, synthetic_jit)
     out = project_root / "processed"
@@ -269,8 +269,9 @@ class TestTokenizedPipeline:
 
 def _real_tokenizers_cached() -> bool:
     try:
+        cache_dir = Path(__file__).resolve().parents[1] / "data" / "models" / "cache"
         for name in ("microsoft/codebert-base", "Salesforce/codet5-small"):
-            AutoTokenizer.from_pretrained(name, local_files_only=True)
+            AutoTokenizer.from_pretrained(name, cache_dir=cache_dir, local_files_only=True, use_safetensors=False)
     except Exception:
         return False
     return True
@@ -279,8 +280,11 @@ def _real_tokenizers_cached() -> bool:
 @pytest.mark.skipif(not _real_tokenizers_cached(), reason="CodeBERT/CodeT5 tokenizers are not in the local cache")
 @pytest.mark.parametrize("name", ["microsoft/codebert-base", "Salesforce/codet5-small"])
 def test_real_tokenizers_keep_path_and_limit(name: str) -> None:
-    tokenizer = AutoTokenizer.from_pretrained(name, local_files_only=True)
-    wrapper = DefectorsTokenizer(DatasetConfig(Path("."), "defectors"), model_name=name, max_length=512)
+    cache_dir = Path(__file__).resolve().parents[1] / "data" / "models" / "cache"
+    tokenizer = AutoTokenizer.from_pretrained(name, cache_dir=cache_dir, local_files_only=True, use_safetensors=False)
+    wrapper = DefectorsTokenizer(
+        DatasetConfig(Path(__file__).resolve().parents[1], "defectors"), model_name=name, max_length=512
+    )
     wrapper._tokenizer = tokenizer
     diffs = [make_diff([400, 400]), make_diff([3]), make_diff([2000])]
     paths = ["airflow/providers/google/cloud/hooks/bigquery.py", "a.py", "tests/test_x.py"]

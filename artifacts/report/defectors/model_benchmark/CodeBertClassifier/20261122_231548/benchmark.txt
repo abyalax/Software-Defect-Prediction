@@ -1,0 +1,23 @@
+
+-------------------------------------------------------------------------------
+CodeBertClassifier benchmark
+-------------------------------------------------------------------------------
+Device: cuda | seq_len=512 | steps=5
+  batch 1: 9.1 train samples/s, 83.1 infer samples/s, peak VRAM 2408.0 MiB
+  batch 2: 14.2 train samples/s, 103.8 infer samples/s, peak VRAM 2432.8 MiB
+  batch 4: 20.0 train samples/s, 112.3 infer samples/s, peak VRAM 2474.6 MiB
+  batch 8: 24.8 train samples/s, 117.0 infer samples/s, peak VRAM 3240.0 MiB
+  batch 16: 28.1 train samples/s, 116.8 infer samples/s, peak VRAM 4826.3 MiB
+
+Estimated hours for the 35 runs of codebert (3 epochs):
+┌───┬────────────────────────┬──────┬───────────────┬─────────────┬────────────────────┐
+│   │ scenario               │ runs │ train_samples │ val_samples │ hours              │
+├───┼────────────────────────┼──────┼───────────────┼─────────────┼────────────────────┤
+│ 0 │ ML_to_NonML            │ 3    │ 35573         │ 4040        │ 3.2504371927809084 │
+│ 1 │ NonML_to_ML            │ 3    │ 152465        │ 18078       │ 13.94758882697962  │
+│ 2 │ Repository_Level_Split │ 3    │ 128791        │ 14070       │ 11.756217569217633 │
+│ 3 │ Within_Domain_ML_DL    │ 3    │ 24766         │ 3107        │ 2.269250482299699  │
+│ 4 │ Within_Domain_Non_ML   │ 3    │ 103008        │ 11980       │ 9.41823739424895   │
+│ 5 │ Group_KFold_ML_DL      │ 10   │ 28543         │ 3147        │ 8.686861816519986  │
+│ 6 │ Group_KFold_Non_ML     │ 10   │ 122827        │ 13608       │ 37.386218271392146 │
+└───┴────────────────────────┴──────┴───────────────┴─────────────┴────────────────────┘

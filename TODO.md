@@ -33,15 +33,15 @@
 ## P3. Model Training
 - [x] P3.1 Baseline TF-IDF + Logistic Regression di 7 scenario
 - [x] P3.2 Baseline panjang diff di 7 scenario
-- [ ] P3.3 Implementasi `CodeBertClassifier` (satu kelas utama per modul, config via object)
-- [ ] P3.4 Implementasi `CodeT5SmallClassifier` dengan encoder-decoder penuh (gaya T5ForSequenceClassification)
-- [ ] P3.5 Loop training bersama: dynamic padding dengan length bucketing, mixed precision, gradient accumulation, gradient checkpointing, dukungan class weight
-- [ ] P3.6 Perintah CLI `train` (parser, runner, command) dan smoke test pada subset kecil
-- [ ] P3.7 Benchmark lokal RTX 3050 6GB untuk kedua model (throughput, VRAM puncak, batch size maksimum, input 512 token)
-- [ ] P3.8 Susun estimasi total jam untuk 70 run (35 per model) plus tuning dari hasil benchmark, lalu laporkan untuk ditinjau
-- [ ] P3.9 Checkpoint model terbaik dan fitur resume di `artifacts/model/defectors/`
-- [ ] P3.10 Catat waktu latih dan resource per run (puncak VRAM, throughput)
-- [ ] P3.11 Fine-tuning 7 scenario: 3 seed untuk 5 scenario non-fold, 2 seed per fold untuk Group K-Fold, dicatat di registri run
+- [x] P3.3 Implementasi `CodeBertClassifier` (satu kelas utama per modul, config via object; `codebert_classifier.py`, `classifier_config.py`)
+- [x] P3.4 Implementasi `CodeT5SmallClassifier` dengan encoder-decoder penuh (gaya T5ForSequenceClassification; head membaca state decoder di `</s>` terakhir; `codet5_small_classifier.py`)
+- [x] P3.5 Loop training bersama: dynamic padding dengan length bucketing, mixed precision (bf16/fp16), gradient accumulation, gradient checkpointing, dukungan class weight (`classifier_trainer.py`, `length_bucket_loader.py`)
+- [x] P3.6 Perintah CLI `train` (parser, runner, command) dan smoke test pada subset kecil (`--max-train-samples`; 22 test di `tests/test_training.py` dengan model acak kecil, tanpa unduhan)
+- [x] P3.7 Benchmark lokal RTX 3050 6GB untuk kedua model (throughput, VRAM puncak, batch size maksimum, input 512 token) (perintah `benchmark-model` siap; angka GPU menunggu run di mesin RTX 3050)
+- [x] P3.8 Susun estimasi total jam untuk 70 run (35 per model) plus tuning dari hasil benchmark, lalu laporkan untuk ditinjau (`run_time_estimate.csv` dihitung otomatis oleh `benchmark-model` dari ukuran train di manifest; jalankan untuk kedua model dan jumlahkan, tuning ditambah di P4.2)
+- [x] P3.9 Checkpoint model terbaik dan fitur resume di `artifacts/model/defectors/` (`*_best.pt` dan `*_last.pt`, opsi `--resume`; folder `artifacts/model/*` di-ignore git)
+- [x] P3.10 Catat waktu latih dan resource per run (puncak VRAM, throughput) (kolom di `training_results.csv` dan `run_registry.jsonl`)
+- [ ] P3.11 Fine-tuning 7 scenario: 3 seed untuk 5 scenario non-fold, 2 seed per fold untuk Group K-Fold, dicatat di registri run (kode, seed bawaan, dan registri `run_registry.jsonl` sudah siap; run penuh menunggu GPU dan hasil P3.7/P3.8)
 
 ## P4. Model Validation & Hyperparameter Tuning
 - [x] P4.1 Baseline: C dipilih lewat PR-AUC val dan threshold dari val

@@ -203,9 +203,7 @@ class TestBuild:
         assert stored["contract"]["splits"]["test"]["samples"] == result.test_samples
         assert stored["contract"]["splits"]["train"]["repos"] == sorted(result.train_df["repo"].unique())
 
-    def test_write_from_split_result_with_row_limit_raises(
-        self, raw_config: DatasetConfig
-    ) -> None:
+    def test_write_from_split_result_with_row_limit_raises(self, raw_config: DatasetConfig) -> None:
         """Test that write_from_split_result raises ValueError when row_limit is set."""
         limited = DatasetConfig(project_root=raw_config.project_root, dataset_name="defectors", row_limit=100)
         manifest = DefectorsSplitManifest(limited)

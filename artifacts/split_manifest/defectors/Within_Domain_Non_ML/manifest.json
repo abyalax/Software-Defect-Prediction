@@ -8,7 +8,7 @@
     },
     "dataset": "defectors",
     "equalize_train_size": null,
-    "fold": null,
+    "fold": 0,
     "format_version": 1,
     "holdout_repositories": {
       "ml_dl": [
@@ -85,9 +85,9 @@
     },
     "val_ratio": 0.1
   },
-  "manifest_sha256": "d0e95542d2c7594bcc5b19efd706def8e151a2d5315ba84ed30533a1f29fb57e",
+  "manifest_sha256": "9d64d6b2eb36a3845c583a86409f1990396c855ad9ae9057b1e03d5d968b5c3a",
   "provenance": {
-    "created_at": "2026-11-22T09:13:37",
+    "created_at": "2026-11-22T20:46:15",
     "git_dirty": true,
     "library_versions": {
       "numpy": "2.5.5",

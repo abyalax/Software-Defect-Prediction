@@ -41,6 +41,11 @@ class DatasetConfig:
     )
 
     @property
+    def model_cache_dir(self) -> Path:
+        """Directory that holds the Hugging Face model cache (downloaded by scripts/download_tokenizers.py)."""
+        return self.project_root / "data" / "models" / "cache"
+
+    @property
     def raw_dir(self) -> Path:
         """Directory that holds the untouched dataset files."""
         return self.project_root / "data" / "raw" / self.dataset_name
@@ -73,10 +78,23 @@ class DatasetConfig:
 
     @property
     def processed_dir(self) -> Path:
-        """Directory that receives processed parquet files."""
-        return self.project_root / "data" / "processed" / "defectors"
+        """Directory that receives the split parquet files (``data/processed/split/<dataset>``).
+
+        Every scenario (and every Group K-Fold fold) gets its own subdirectory below it.
+        """
+        return self.project_root / "data" / "processed" / "split" / self.dataset_name
+
+    @property
+    def model_dir(self) -> Path:
+        """Directory that receives model checkpoints and the run registry (``artifacts/model/<dataset>``)."""
+        return self.artifacts_dir / "model" / self.dataset_name
 
     @property
     def split_manifest_dir(self) -> Path:
         """Directory that holds the row-level split manifests (tracked in git, unlike processed data)."""
         return self.artifacts_dir / "split_manifest" / self.dataset_name
+
+    @property
+    def run_registry_path(self) -> Path:
+        """Tracked registry of fine-tuning runs (one JSON line per run)."""
+        return self.artifacts_dir / "report" / self.dataset_name / "model_training" / "run_registry.jsonl"

@@ -113,7 +113,11 @@ class DefectorsDatasetExplorer:
         for checkpoint_num in checkpoint_numbers:
             if checkpoint_num in self._checkpoint_classes:
                 checkpoint_class = self._checkpoint_classes[checkpoint_num]
-                checkpoint = checkpoint_class(self._loader, self._reporter)
+                # TokenDistribution needs cache_dir
+                if checkpoint_num == 12:
+                    checkpoint = checkpoint_class(self._loader, self._reporter, cache_dir=self._config.model_cache_dir)
+                else:
+                    checkpoint = checkpoint_class(self._loader, self._reporter)
                 checkpoint.run()
             else:
                 self._reporter.display_warning(f"Checkpoint {checkpoint_num} not found, skipping...")

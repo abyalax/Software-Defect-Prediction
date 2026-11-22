@@ -1589,6 +1589,7 @@ name = "software-defects"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "hf-xet" },
     { name = "matplotlib" },
     { name = "pandas" },
     { name = "pyarrow" },
@@ -1607,6 +1608,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "hf-xet", specifier = ">=1.8.0" },
     { name = "matplotlib", specifier = ">=3.11.2" },
     { name = "pandas", specifier = ">=2.0.0" },
     { name = "pyarrow", specifier = ">=14.0.0" },

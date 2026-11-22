@@ -90,7 +90,7 @@
   },
   "manifest_sha256": "4cf4464a23ac44f7006b16fe89025882725ca9c3beca7b7cf491df1ae1fbd21c",
   "provenance": {
-    "created_at": "2026-11-22T09:13:37",
+    "created_at": "2026-11-22T21:11:19",
     "git_dirty": true,
     "library_versions": {
       "numpy": "2.5.5",
