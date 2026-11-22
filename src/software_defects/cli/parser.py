@@ -173,6 +173,13 @@ class ParserArgs:
         )
         parser.add_argument("--resume", action="store_true", help="Continue runs from their last checkpoint.")
         parser.add_argument(
+            "--checkpoint-every",
+            type=int,
+            default=200,
+            help="Also save last.pt every N optimizer updates inside an epoch (0 = only at epoch end). "
+            "Each save writes the full model and optimizer state (about 1.5 GB for CodeBERT).",
+        )
+        parser.add_argument(
             "--max-train-samples", type=int, default=None, help="Smoke test: use only the first N training rows."
         )
         parser.add_argument(

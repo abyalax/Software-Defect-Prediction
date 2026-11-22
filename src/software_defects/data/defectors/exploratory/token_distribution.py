@@ -64,10 +64,7 @@ class TokenDistribution:
         for model_label, hf_name in TOKENIZER_MODELS.items():
             try:
                 tokenizer = AutoTokenizer.from_pretrained(
-                    hf_name, 
-                    cache_dir=self._cache_dir, 
-                    local_files_only=True, 
-                    use_safetensors=False
+                    hf_name, cache_dir=self._cache_dir, local_files_only=True, use_safetensors=False
                 )
             except Exception as exc:  # noqa: BLE001 - offline or missing model must not stop the run
                 self._reporter.display_warning(f"  Could not load tokenizer {hf_name}: {exc}")

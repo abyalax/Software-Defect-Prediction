@@ -1,4 +1,3 @@
-
 """Download and cache pretrained models for software defect analysis.
 
 Downloads the tokenizers and PyTorch model weights required by the
@@ -50,6 +49,7 @@ TOKENIZER_MODELS = {
 
 
 # Download utilities
+
 
 def download_model(label: str, config: dict) -> None:
     """Download a tokenizer and its pretrained PyTorch model.
@@ -170,6 +170,7 @@ def download_all_models() -> None:
 
 
 # Entry point
+
 
 def main() -> None:
     """Execute the model download process."""

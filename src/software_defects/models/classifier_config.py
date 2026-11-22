@@ -53,6 +53,9 @@ class TrainingConfig:
     eval_batch_size: int = 32
     # Log a line every N optimizer steps
     log_every: int = 50
+    # Also write ``last.pt`` every N optimizer updates inside an epoch (0 = only at the end of each epoch).
+    # Every write is a full model + optimizer snapshot, so keep it in the hundreds to spare the disk.
+    checkpoint_every_updates: int = 200
 
     def __post_init__(self) -> None:
         """Reject values that would silently break the loop."""
@@ -62,6 +65,8 @@ class TrainingConfig:
             raise ValueError(f"class_weight must be one of {CLASS_WEIGHT_CHOICES}, got {self.class_weight!r}")
         if self.batch_size < 1 or self.gradient_accumulation_steps < 1 or self.epochs < 1:
             raise ValueError("batch_size, gradient_accumulation_steps and epochs must be at least 1")
+        if self.checkpoint_every_updates < 0:
+            raise ValueError("checkpoint_every_updates must be 0 (off) or a positive number of optimizer updates")
 
     @property
     def effective_batch_size(self) -> int:
@@ -97,5 +102,7 @@ class TrainingResult:
     n_parameters: int = 0
     precision: str = "fp32"
     resumed_from_epoch: int | None = None
+    # Optimizer updates already done inside the unfinished epoch when the run was resumed (None = epoch boundary)
+    resumed_from_update: int | None = None
     best_checkpoint: str | None = None
     last_checkpoint: str | None = None

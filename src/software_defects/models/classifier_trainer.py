@@ -43,7 +43,8 @@ class ClassifierTrainer:
             config: Training settings.
             device: Device to train on; defaults to CUDA when available, else CPU.
             best_path: File that receives the weights of the best epoch (kept in memory when None).
-            last_path: File that receives the full training state after every epoch, used to resume.
+            last_path: File that receives the full training state after every epoch (and every
+                ``checkpoint_every_updates`` updates inside an epoch), used to resume.
             log: Callable that receives progress lines.
         """
         self._config = config
@@ -98,10 +99,18 @@ class ClassifierTrainer:
         )
         start_epoch = 0
         carried_seconds = 0.0
+        partial: dict | None = None
         if resume and self._last_path is not None and self._last_path.exists():
-            start_epoch, carried_seconds = self._load_last(optimizer, scheduler, result)
+            start_epoch, carried_seconds, partial = self._load_last(optimizer, scheduler, result)
             result.resumed_from_epoch = start_epoch
-            self._log(f"Resumed from {self._last_path} after epoch {start_epoch}")
+            if partial is not None:
+                result.resumed_from_update = partial["updates_done"]
+                self._log(
+                    f"Resumed from {self._last_path} after epoch {start_epoch} "
+                    f"and {partial['updates_done']} updates of epoch {partial['epoch']}"
+                )
+            else:
+                self._log(f"Resumed from {self._last_path} after epoch {start_epoch}")
 
         if self._device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(self._device)
@@ -112,7 +121,17 @@ class ClassifierTrainer:
         for epoch in range(start_epoch + 1, config.epochs + 1):
             epoch_start = time.perf_counter()
             train_loader.set_epoch(epoch)
-            train_loss, n_samples = self._train_epoch(train_loader, optimizer, scheduler, epoch)
+            resume_point = partial if partial is not None and partial["epoch"] == epoch else None
+            train_loss, n_samples = self._train_epoch(
+                train_loader,
+                optimizer,
+                scheduler,
+                epoch,
+                result,
+                lambda: carried_seconds + time.perf_counter() - wall_start,
+                resume_point,
+            )
+            partial = None
             train_seconds += time.perf_counter() - epoch_start
             samples_seen += n_samples
 
@@ -169,14 +188,34 @@ class ClassifierTrainer:
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler.LRScheduler,
         epoch: int,
+        result: TrainingResult,
+        elapsed: Callable[[], float],
+        resume_point: dict | None = None,
     ) -> tuple[float, int]:
-        """Run one epoch; returns (mean training loss, samples seen)."""
+        """Run one epoch; returns (mean training loss, samples seen in this process).
+
+        Args:
+            loader: Training batches of this epoch.
+            optimizer: Optimizer to step.
+            scheduler: Learning-rate scheduler, stepped once per optimizer update.
+            epoch: 1-based epoch number.
+            result: Result holder, stored in mid-epoch checkpoints.
+            elapsed: Returns the training seconds so far (stored in mid-epoch checkpoints).
+            resume_point: Mid-epoch state from ``last.pt``; the batches already done are skipped.
+        """
         config = self._config
         self._model.train()
         optimizer.zero_grad(set_to_none=True)
         n_batches = len(loader)
         loss_sum, n_samples, update = 0.0, 0, 0
-        for step, (batch, indices) in enumerate(loader, start=1):
+        first_batch, carried_samples = 0, 0
+        if resume_point is not None:
+            first_batch = self._check_resume_point(resume_point, n_batches)
+            loss_sum, n_samples = resume_point["loss_sum"], resume_point["n_samples"]
+            update = resume_point["updates_done"]
+            carried_samples = n_samples
+            self._restore_rng(resume_point.get("rng"))
+        for step, (batch, indices) in enumerate(loader.iter_from(first_batch), start=first_batch + 1):
             batch = {key: value.to(self._device) for key, value in batch.items()}
             with self._autocast():
                 logits = self._model(batch["input_ids"], batch["attention_mask"])
@@ -200,7 +239,22 @@ class ClassifierTrainer:
                 update += 1
                 if config.log_every and update % config.log_every == 0:
                     self._log(f"    epoch {epoch} update {update}: running loss {loss_sum / n_samples:.4f}")
-        return loss_sum / max(n_samples, 1), n_samples
+                every = config.checkpoint_every_updates
+                if every and update % every == 0 and step < n_batches:
+                    # Right after an update the gradients are zero, so the state below is a clean restart point.
+                    # The last step of the epoch is skipped: the end-of-epoch checkpoint covers it.
+                    point = {
+                        "epoch": epoch,
+                        "batches_done": step,
+                        "updates_done": update,
+                        "loss_sum": loss_sum,
+                        "n_samples": n_samples,
+                        "batch_size": config.batch_size,
+                        "gradient_accumulation_steps": config.gradient_accumulation_steps,
+                        "rng": self._capture_rng(),
+                    }
+                    self._save_last(optimizer, scheduler, result, elapsed(), partial=point)
+        return loss_sum / max(n_samples, 1), n_samples - carried_samples
 
     def _loss(self, logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         """Cross-entropy with the optional class weights."""
@@ -262,8 +316,13 @@ class ClassifierTrainer:
         scheduler: torch.optim.lr_scheduler.LRScheduler,
         result: TrainingResult,
         elapsed_seconds: float,
+        partial: dict | None = None,
     ) -> None:
-        """Write the full state needed to resume after the epoch that just finished."""
+        """Write the full state needed to resume.
+
+        Without ``partial`` the state is the one after the epoch that just finished; with it, the state is a
+        restart point inside the next, unfinished epoch (``epoch`` still counts finished epochs only).
+        """
         if self._last_path is None:
             return
         state = {
@@ -276,6 +335,7 @@ class ClassifierTrainer:
             "best_val_pr_auc": result.best_val_pr_auc,
             "history": [record.__dict__ for record in result.history],
             "elapsed_seconds": elapsed_seconds,
+            "partial": partial,
         }
         self._atomic_save(state, self._last_path)
 
@@ -284,8 +344,13 @@ class ClassifierTrainer:
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler.LRScheduler,
         result: TrainingResult,
-    ) -> tuple[int, float]:
-        """Restore the state written by ``_save_last``; returns (finished epochs, elapsed seconds)."""
+    ) -> tuple[int, float, dict | None]:
+        """Restore the state written by ``_save_last``.
+
+        Returns:
+            ``(finished epochs, elapsed seconds, mid-epoch point or None)``. Checkpoints written before the
+            mid-epoch feature have no ``partial`` key and resume at the epoch boundary as before.
+        """
         state = torch.load(self._last_path, map_location=self._device, weights_only=False)
         self._model.load_state_dict(state["model"])
         optimizer.load_state_dict(state["optimizer"])
@@ -295,7 +360,38 @@ class ClassifierTrainer:
         result.best_val_pr_auc = state["best_val_pr_auc"]
         result.epochs_run = state["epoch"]
         result.history = [EpochRecord(**record) for record in state["history"]]
-        return state["epoch"], state["elapsed_seconds"]
+        return state["epoch"], state["elapsed_seconds"], state.get("partial")
+
+    def _check_resume_point(self, point: dict, n_batches: int) -> int:
+        """Validate a mid-epoch point against the current setup; returns the number of batches to skip."""
+        config = self._config
+        if (point["batch_size"], point["gradient_accumulation_steps"]) != (
+            config.batch_size,
+            config.gradient_accumulation_steps,
+        ):
+            raise ValueError(
+                "Cannot resume inside an epoch: batch size / gradient accumulation differ from the checkpoint "
+                f"({point['batch_size']}/{point['gradient_accumulation_steps']} vs "
+                f"{config.batch_size}/{config.gradient_accumulation_steps}). Use the original settings."
+            )
+        if point["batches_done"] >= n_batches:
+            raise ValueError("Cannot resume inside an epoch: the checkpoint is past the end of this training set")
+        return int(point["batches_done"])
+
+    def _capture_rng(self) -> dict:
+        """RNG state (dropout) so a resumed epoch continues the same random stream."""
+        state = {"cpu": torch.get_rng_state()}
+        if self._device.type == "cuda":
+            state["cuda"] = torch.cuda.get_rng_state_all()
+        return state
+
+    def _restore_rng(self, state: dict | None) -> None:
+        """Restore ``_capture_rng`` output (no-op for checkpoints without it)."""
+        if not state:
+            return
+        torch.set_rng_state(state["cpu"].cpu())
+        if "cuda" in state and self._device.type == "cuda":
+            torch.cuda.set_rng_state_all([s.cpu() for s in state["cuda"]])
 
     @staticmethod
     def _atomic_save(obj: object, path: Path) -> None:

@@ -215,7 +215,11 @@ def tokenized_pipeline(
     config: DatasetConfig, project_root: Path, synthetic_jit: pd.DataFrame, monkeypatch, roberta_like_tokenizer
 ):
     """Run the pipeline with the offline tokenizer for both models and a tight limit so truncation happens."""
-    monkeypatch.setattr(AutoTokenizer, "from_pretrained", lambda *args, **kwargs: roberta_like_tokenizer, )
+    monkeypatch.setattr(
+        AutoTokenizer,
+        "from_pretrained",
+        lambda *args, **kwargs: roberta_like_tokenizer,
+    )
     config = replace(config, tokenizer_max_length=96)
     write_raw_jit(project_root, synthetic_jit)
     out = project_root / "processed"

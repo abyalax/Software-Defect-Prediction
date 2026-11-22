@@ -229,6 +229,7 @@ class RunnerCLI:
             precision=arguments.precision,
             max_train_samples=arguments.max_train_samples,
             max_val_samples=arguments.max_val_samples,
+            checkpoint_every_updates=arguments.checkpoint_every,
         )
         classifier_config = ClassifierConfig(
             pretrained_name=TRAINABLE_MODELS[arguments.model][1],

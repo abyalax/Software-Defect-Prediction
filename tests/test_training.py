@@ -94,6 +94,16 @@ class TestLengthBucketLoader:
 
         assert padded_tokens(True) < padded_tokens(False)
 
+    def test_iter_from_skips_the_first_batches_of_the_same_order(self) -> None:
+        ids, labels = synthetic_samples()
+        loader = LengthBucketLoader(ids, labels, 8, PAD, shuffle=True, pool_factor=2, seed=1)
+        loader.set_epoch(2)
+
+        full = [indices.tolist() for _, indices in loader]
+        tail = [indices.tolist() for _, indices in loader.iter_from(3)]
+
+        assert tail == full[3:]
+
     def test_epoch_changes_the_order_and_seed_makes_it_reproducible(self) -> None:
         train, _, _ = loaders()
         first = [b.tolist() for b in train.batch_indices()]
@@ -184,6 +194,43 @@ class TestTrainer:
         assert [record.epoch for record in result.history] == [1, 2]
         assert result.epochs_run == 2
 
+    def test_resume_continues_inside_an_unfinished_epoch(self, tmp_path: Path) -> None:
+        train, val, labels = loaders()  # 6 micro-batches, accumulation 2 -> 3 updates per epoch
+
+        reference = self.trainer(tmp_path / "ref", checkpoint_every_updates=1).fit(train, val, labels)
+
+        def crash_in_epoch_two_update_three(line: str) -> None:
+            if "epoch 2 update 2" in line:
+                raise KeyboardInterrupt
+
+        with pytest.raises(KeyboardInterrupt):
+            interrupted = self.trainer(
+                tmp_path / "run", crash_in_epoch_two_update_three, checkpoint_every_updates=1, log_every=1
+            )
+            interrupted.fit(train, val, labels)
+
+        result = self.trainer(tmp_path / "run", checkpoint_every_updates=1).fit(train, val, labels, resume=True)
+
+        assert result.resumed_from_epoch == 1
+        assert result.resumed_from_update == 1
+        assert [record.epoch for record in result.history] == [1, 2]
+        assert result.history[-1].train_loss == pytest.approx(reference.history[-1].train_loss, rel=1e-4)
+        assert result.best_val_pr_auc == pytest.approx(reference.best_val_pr_auc, rel=1e-4)
+
+    def test_mid_epoch_resume_rejects_a_changed_batch_setup(self, tmp_path: Path) -> None:
+        train, val, labels = loaders()
+
+        def crash(line: str) -> None:
+            if "epoch 1 update 2" in line:
+                raise KeyboardInterrupt
+
+        with pytest.raises(KeyboardInterrupt):
+            self.trainer(tmp_path, crash, checkpoint_every_updates=1, log_every=1).fit(train, val, labels)
+
+        changed = loaders(batch_size=4)[0]
+        with pytest.raises(ValueError, match="batch size"):
+            self.trainer(tmp_path).fit(changed, val, labels, resume=True)
+
     def test_non_finite_loss_is_reported(self, tmp_path: Path) -> None:
         train, val, labels = loaders()
         trainer = self.trainer(tmp_path)
@@ -194,6 +241,8 @@ class TestTrainer:
 
 
 def test_training_config_rejects_bad_values() -> None:
+    with pytest.raises(ValueError, match="checkpoint_every_updates"):
+        TrainingConfig(checkpoint_every_updates=-1)
     with pytest.raises(ValueError, match="precision"):
         TrainingConfig(precision="fp8")
     with pytest.raises(ValueError, match="at least 1"):

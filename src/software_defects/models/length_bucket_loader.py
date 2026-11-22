@@ -84,7 +84,15 @@ class LengthBucketLoader:
 
     def __iter__(self) -> Iterator[tuple[dict[str, torch.Tensor], np.ndarray]]:
         """Yield ``(batch, sample_indices)``; the batch holds ``input_ids``, ``attention_mask`` and ``labels``."""
-        for indices in self.batch_indices():
+        return self.iter_from(0)
+
+    def iter_from(self, start_batch: int) -> Iterator[tuple[dict[str, torch.Tensor], np.ndarray]]:
+        """Like ``__iter__`` but skip the first ``start_batch`` batches without collating them.
+
+        The batch order only depends on the seed and the epoch, so skipping resumes an interrupted epoch exactly
+        where it stopped.
+        """
+        for indices in self.batch_indices()[start_batch:]:
             yield self._collate(indices), indices
 
     def _collate(self, indices: np.ndarray) -> dict[str, torch.Tensor]:
