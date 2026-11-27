@@ -1,0 +1,96 @@
+
+------------------------------------------------------------------------------------------------------------------------
+CodeBertClassifier training (Within_Domain_ML_DL)
+------------------------------------------------------------------------------------------------------------------------
+Device: cuda
+Training config: {'learning_rate': 2e-05, 'weight_decay': 0.01, 'epochs': 3, 'batch_size': 4, 'gradient_accumulation_steps': 8, 'warmup_ratio': 0.1, 'max_grad_norm': 1.0, 'max_length': 512, 'length_bucketing': True, 'bucket_pool_factor': 50, 'class_weight': 'balanced', 'precision': 'auto', 'seed': 42, 'max_train_samples': None, 'max_val_samples': None, 'eval_batch_size': 32, 'log_every': 50, 'checkpoint_every_updates': 200}
+
+Loaded train: 24,766 rows from C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_ML_DL\codebert\Within_Domain_ML_DL_train.parquet
+Loaded val: 3,107 rows from C:\Users\abya\python\software-defect\data\processed\split\defectors\Within_Domain_ML_DL\codebert\Within_Domain_ML_DL_val.parquet
+
+Run codebert_Within_Domain_ML_DL_seed42: train=24,766 val=3,107 effective batch=32 precision=bf16
+Resumed from C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Within_Domain_ML_DL_seed42_last.pt after epoch 3
+  best epoch 3: val PR-AUC=0.6265 | 3693.1s, 0.0 samples/s, peak VRAM=1907 MiB
+
+Run codebert_Within_Domain_ML_DL_seed43: train=24,766 val=3,107 effective batch=32 precision=bf16
+Resumed from C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Within_Domain_ML_DL_seed43_last.pt after epoch 1 and 200 updates of epoch 2
+    epoch 2 update 250: running loss 0.6029
+    epoch 2 update 300: running loss 0.5988
+    epoch 2 update 350: running loss 0.5964
+    epoch 2 update 400: running loss 0.5946
+    epoch 2 update 450: running loss 0.5932
+    epoch 2 update 500: running loss 0.5934
+    epoch 2 update 550: running loss 0.5921
+    epoch 2 update 600: running loss 0.5918
+    epoch 2 update 650: running loss 0.5891
+    epoch 2 update 700: running loss 0.5889
+    epoch 2 update 750: running loss 0.5875
+  epoch 2/3: train_loss=0.5869 val_loss=0.6825 val_PR-AUC=0.6247 val_ROC-AUC=0.6816 (797.7s)
+    epoch 3 update 50: running loss 0.5546
+    epoch 3 update 100: running loss 0.5507
+    epoch 3 update 150: running loss 0.5453
+    epoch 3 update 200: running loss 0.5514
+    epoch 3 update 250: running loss 0.5433
+    epoch 3 update 300: running loss 0.5442
+    epoch 3 update 350: running loss 0.5436
+    epoch 3 update 400: running loss 0.5441
+    epoch 3 update 450: running loss 0.5436
+    epoch 3 update 500: running loss 0.5435
+    epoch 3 update 550: running loss 0.5423
+    epoch 3 update 600: running loss 0.5417
+    epoch 3 update 650: running loss 0.5404
+    epoch 3 update 700: running loss 0.5401
+    epoch 3 update 750: running loss 0.5385
+  epoch 3/3: train_loss=0.5385 val_loss=0.6937 val_PR-AUC=0.6373 val_ROC-AUC=0.6878 (1100.2s)
+  best epoch 3: val PR-AUC=0.6373 | 3477.6s, 23.3 samples/s, peak VRAM=2431 MiB
+
+Run codebert_Within_Domain_ML_DL_seed44: train=24,766 val=3,107 effective batch=32 precision=bf16
+    epoch 1 update 50: running loss 0.6985
+    epoch 1 update 100: running loss 0.6957
+    epoch 1 update 150: running loss 0.6949
+    epoch 1 update 200: running loss 0.6912
+    epoch 1 update 250: running loss 0.6863
+    epoch 1 update 300: running loss 0.6827
+    epoch 1 update 350: running loss 0.6790
+    epoch 1 update 400: running loss 0.6725
+    epoch 1 update 450: running loss 0.6695
+    epoch 1 update 500: running loss 0.6663
+    epoch 1 update 550: running loss 0.6630
+    epoch 1 update 600: running loss 0.6593
+    epoch 1 update 650: running loss 0.6547
+    epoch 1 update 700: running loss 0.6523
+    epoch 1 update 750: running loss 0.6494
+  epoch 1/3: train_loss=0.6476 val_loss=0.6638 val_PR-AUC=0.5977 val_ROC-AUC=0.6642 (1086.9s)
+    epoch 2 update 50: running loss 0.5904
+    epoch 2 update 100: running loss 0.5889
+    epoch 2 update 150: running loss 0.5860
+    epoch 2 update 200: running loss 0.5887
+    epoch 2 update 250: running loss 0.5794
+    epoch 2 update 300: running loss 0.5791
+    epoch 2 update 350: running loss 0.5767
+    epoch 2 update 400: running loss 0.5761
+    epoch 2 update 450: running loss 0.5764
+    epoch 2 update 500: running loss 0.5757
+    epoch 2 update 550: running loss 0.5739
+    epoch 2 update 600: running loss 0.5735
+    epoch 2 update 650: running loss 0.5715
+    epoch 2 update 700: running loss 0.5712
+    epoch 2 update 750: running loss 0.5693
+  epoch 2/3: train_loss=0.5694 val_loss=0.6800 val_PR-AUC=0.6294 val_ROC-AUC=0.6857 (1094.3s)
+    epoch 3 update 50: running loss 0.5313
+    epoch 3 update 100: running loss 0.5214
+    epoch 3 update 150: running loss 0.5162
+    epoch 3 update 200: running loss 0.5145
+    epoch 3 update 250: running loss 0.5156
+    epoch 3 update 300: running loss 0.5165
+    epoch 3 update 350: running loss 0.5195
+    epoch 3 update 400: running loss 0.5195
+    epoch 3 update 450: running loss 0.5169
+    epoch 3 update 500: running loss 0.5180
+    epoch 3 update 550: running loss 0.5170
+    epoch 3 update 600: running loss 0.5159
+    epoch 3 update 650: running loss 0.5157
+    epoch 3 update 700: running loss 0.5148
+    epoch 3 update 750: running loss 0.5131
+  epoch 3/3: train_loss=0.5124 val_loss=0.7264 val_PR-AUC=0.6331 val_ROC-AUC=0.6810 (1133.0s)
+  best epoch 3: val PR-AUC=0.6331 | 3339.9s, 22.9 samples/s, peak VRAM=2428 MiB

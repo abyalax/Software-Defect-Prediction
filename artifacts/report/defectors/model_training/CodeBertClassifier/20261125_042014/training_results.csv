@@ -1,0 +1,4 @@
+scenario,model,fold,seed,n_train,n_val,best_epoch,epochs_run,best_val_pr_auc,train_seconds,throughput_samples_per_second,peak_vram_mib,n_parameters,precision,effective_batch_size,best_checkpoint
+Repository_Level_Split,codebert,0,42,128791,14070,1,3,0.6896495931256446,17516.352138100076,0.0,1907.00732421875,124647170,bf16,32,C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Repository_Level_Split_seed42_best.pt
+Repository_Level_Split,codebert,0,43,128791,14070,2,3,0.6799458996966187,18172.281465399952,23.781295884880247,2429.46044921875,124647170,bf16,32,C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Repository_Level_Split_seed43_best.pt
+Repository_Level_Split,codebert,0,44,128791,14070,2,3,0.6758760450647631,23399.03546600003,16.760767262687814,2432.56005859375,124647170,bf16,32,C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Repository_Level_Split_seed44_best.pt

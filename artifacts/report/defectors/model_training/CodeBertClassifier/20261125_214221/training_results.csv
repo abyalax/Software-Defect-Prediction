@@ -1,0 +1,4 @@
+scenario,model,fold,seed,n_train,n_val,best_epoch,epochs_run,best_val_pr_auc,train_seconds,throughput_samples_per_second,peak_vram_mib,n_parameters,precision,effective_batch_size,best_checkpoint
+Within_Domain_Non_ML,codebert,0,42,103008,11980,1,3,0.7095657788884304,13184.083171800028,24.52720093755228,2426.83544921875,124647170,bf16,32,C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Within_Domain_Non_ML_seed42_best.pt
+Within_Domain_Non_ML,codebert,0,43,103008,11980,2,3,0.7082528521311384,12805.726433200001,24.61909982367038,2424.85693359375,124647170,bf16,32,C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Within_Domain_Non_ML_seed43_best.pt
+Within_Domain_Non_ML,codebert,0,44,103008,11980,1,3,0.6880309033524931,12721.0733412,24.766765434595293,2428.90380859375,124647170,bf16,32,C:\Users\abya\python\software-defect\artifacts\model\defectors\codebert_Within_Domain_Non_ML_seed44_best.pt
